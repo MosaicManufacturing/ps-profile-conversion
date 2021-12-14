@@ -1,5 +1,5 @@
 {
-  "name": "ps-profile-conversion",
+  "name": "@mosaic-canvas/ps-profile-conversion",
   "version": "0.1.0",
   "main": "src/index.js",
   "author": "Mosaic Manufacturing Ltd.",
