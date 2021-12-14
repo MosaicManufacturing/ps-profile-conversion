@@ -1,0 +1,16 @@
+{
+  "name": "ps-profile-conversion",
+  "version": "0.1.0",
+  "main": "src/index.js",
+  "author": "Mosaic Manufacturing Ltd.",
+  "repository": {
+    "url": "https://github.com/MosaicManufacturing/ps-profile-conversion"
+  },
+  "license": "MIT",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint src"
+  },
+  "devDependencies": {
+    "eslint": "^8.4.1"
+  }
+}
