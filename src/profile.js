@@ -289,7 +289,7 @@ class Profile {
     this.clearBufferCommand = 'G4 P0';
     this.towerSpeed = new Array(extruderCount).fill(0);
     this.towerExtrusionWidth = 0.45;
-    this.beforeLayerGcodePrinterscript = '';
+    this.layerGcodePrinterscript = '';
     this.endGcodePrinterscript = '';
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
     this.startGcodePrinterscript = '';

@@ -611,11 +611,11 @@ const index = (input) => {
 
   // layer change sequence
   if (machine.layerChangeSequence) {
-    profile.beforeLayerGcode = ';*/*/*/*/* LAYER CHANGE SEQUENCE ([layer_num], [layer_z]) */*/*/*/*';
+    profile.layerGcode = ';*/*/*/*/* LAYER CHANGE SEQUENCE ([layer_num], [layer_z]) */*/*/*/*';
     if (machine.layerChangeSequence.startsWith('@printerscript')) {
-      profile.beforeLayerGcodePrinterscript = machine.layerChangeSequence;
+      profile.layerGcodePrinterscript = machine.layerChangeSequence;
     } else {
-      profile.beforeLayerGcodePrinterscript = sequences
+      profile.layerGcodePrinterscript = sequences
         .convertToPrinterScript(machine.layerChangeSequence);
     }
   }
