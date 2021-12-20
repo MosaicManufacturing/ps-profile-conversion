@@ -488,6 +488,10 @@ const index = (input) => {
   if (extruderCount > 1) {
     if (transitionTower) {
       profile.supportMaterialSynchronizeLayers = true;
+      // sadly need to override support Z-gap for two reasons:
+      // - https://github.com/prusa3d/PrusaSlicer/issues/553
+      // - https://github.com/prusa3d/PrusaSlicer/issues/599
+      profile.supportMaterialContactDistance = 0;
       for (let i = 0; i < extruderCount; i++) {
         if (materials[i].style.useTowerSpeed) {
           profile.towerSpeed[i] = materials[i].style.towerSpeed;
