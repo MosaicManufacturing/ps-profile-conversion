@@ -327,11 +327,6 @@ const index = (input) => {
     // units === 'mm'
     profile.supportMaterialContactDistance = style.supportZGap.value;
   }
-  if (profile.supportMaterialContactDistance !== 0) {
-    // some projects crash if this setting is false when contact distance !== 0
-    // TODO: see if this workaround can be removed after PS 2.4.0 stable release
-    profile.thickBridges = true;
-  }
   profile.supportMaterialXYSpacing = style.supportXYGap;
   if (style.defaultSupportExtruder.value === 'auto') {
     profile.supportMaterialExtruder = 0;
