@@ -554,6 +554,11 @@ const index = (input) => {
     }
   }
 
+  if (profile.supportMaterialContactDistance !== 0) {
+    // some projects crash if this setting is false when contact distance !== 0
+    profile.thickBridges = true;
+  }
+
   // firmware-specific automatic overrides
   // (must happen after everything but G-code sequences)
   switch (machine.extension) {
