@@ -275,6 +275,7 @@ const index = (input) => {
   } else {
     profile.externalPerimeterSpeed = style.solidLayerSpeed;
   }
+  profile.smallPerimeterSpeed = Math.min(profile.perimeterSpeed, profile.externalPerimeterSpeed);
   profile.travelSpeed = style.rapidXYSpeed;
   profile.travelSpeedZ = style.rapidZSpeed;
   profile.machineMaxFeedrateX = [style.rapidXYSpeed, style.rapidXYSpeed];
