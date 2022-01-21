@@ -104,11 +104,10 @@ const index = (input) => {
     profile.useRelativeEDistances = true;
   } else if (machine.firmwareType === 2) {
     // RepRap 5D Absolute
-  } else if (machine.firmwareType === 10) {
     profile.useRelativeEDistances = false;
+  } else if (machine.firmwareType === 10) {
     // FlashForge
     profile.useRelativeEDistances = true;
-    profile.gcodeFlavor = GCodeFlavors.SAILFISH;
   } else if (machine.firmwareType === 11) {
     // Ultimaker Griffin
     profile.useRelativeEDistances = false;
