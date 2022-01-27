@@ -248,7 +248,7 @@ class Profile {
     this.supportMaterialSynchronizeLayers = false;
     this.supportMaterialThreshold = 55;
     this.supportMaterialWithSheath = false;
-    this.supportMaterialXYSpacing = 50;
+    this.supportMaterialXYSpacing = '50%';
     this.temperature = new Array(extruderCount).fill(205);
     this.templateCustomGcode = '';
     this.thickBridges = false;
@@ -572,7 +572,7 @@ class Profile {
 ; support_material_synchronize_layers = ${boolToIntString(this.supportMaterialSynchronizeLayers)}
 ; support_material_threshold = ${this.supportMaterialThreshold}
 ; support_material_with_sheath = ${boolToIntString(this.supportMaterialWithSheath)}
-; support_material_xy_spacing = ${this.supportMaterialXYSpacing}%
+; support_material_xy_spacing = ${this.supportMaterialXYSpacing}
 ; temperature = ${this.temperature.join(',')}
 ; template_custom_gcode = ${this.templateCustomGcode || ';'}
 ; thick_bridges = ${boolToIntString(this.thickBridges)}
