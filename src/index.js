@@ -421,6 +421,7 @@ const index = (input) => {
       const fanSpeedMaterial = getMaterialFieldValue(materials[i], 'fanSpeed', style.fanSpeed);
       profile.minFanSpeed[i] = fanSpeedMaterial;
       profile.maxFanSpeed[i] = fanSpeedMaterial;
+      profile.bridgeFanSpeed[i] = fanSpeedMaterial;
       const fanLayerMaterial = getMaterialFieldValue(materials[i], 'enableFanAtLayer', style.enableFanAtLayer);
       if (fanLayerMaterial <= 0) {
         profile.disableFanFirstLayers[i] = 0;
