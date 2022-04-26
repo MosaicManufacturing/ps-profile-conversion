@@ -441,7 +441,9 @@ const index = (input) => {
     profile.retractLength[i] = getMaterialFieldValue(materials[i], 'retractLength', style.retractLength);
     profile.retractLengthToolchange[i] = profile.retractLength[i];
     profile.retractSpeed[i] = getMaterialFieldValue(materials[i], 'retractSpeed', style.retractSpeed);
-    profile.wipe[i] = getMaterialFieldValue(materials[i], 'wipeLength', style.wipeLength) > 0;
+    if (!profile.useFirmwareRetraction) {
+      profile.wipe[i] = getMaterialFieldValue(materials[i], 'wipeLength', style.wipeLength) > 0;
+    }
     profile.retractBeforeTravel[i] = style.retractDisableThreshold;
     profile.retractLift[i] = style.zLift;
     profile.retractLiftAbove[i] = 0;
