@@ -1,28 +1,39 @@
+// - convert \ to \\
+// - convert {{ to \{{
+// - convert " to \"
+const convertEscapes = (line) => line
+  .replace(/\\/g, '\\\\')
+  .replace(/{{/g, '\\{{')
+  .replace(/"/g, '\\"');
+
+// convert <VAR> variables to {{var}} variables
+const convertVariables = (line, isStartSequence = false) => line
+  .replace(/<X>/g, '{{currentX}}')
+  .replace(/<Y>/g, '{{currentY}}')
+  .replace(/<Z>/g, '{{currentZ}}')
+  .replace(/<NEXTX>/g, '{{nextX}}')
+  .replace(/<NEXTY>/g, '{{nextY}}')
+  .replace(/<E>/g, '0')
+  .replace(/<DESTRING>/g, '{{retractDistance}}')
+  .replace(/<TEMP>/g, isStartSequence ? '{{firstLayerPrintTemperature}}' : '{{currentPrintTemperature}}')
+  .replace(/<BED>/g, isStartSequence ? '{{bedTemperature}}' : '{{currentBedTemperature}}')
+  .replace(/<LAYER>/g, '{{layer}}')
+  .replace(/<TELAPSED>/g, '{{timeElapsed}}')
+  .replace(/<TREMAIN>/g, '{{totalTime - timeElapsed}}')
+  .replace(/<TTOTAL>/g, '{{totalTime}}');
 
 const convertToPrinterScript = (sequence, isStartSequence = false) => {
-  // trim whitespace and normalize newlines
-  const trimmed = sequence.trim().replace(/\r\n|\r|\n/g, '\n');
-  // convert <VAR> variables to {{var}} variables
-  const replaced = trimmed
-    .replace(/<X>/g, '{{currentX}}')
-    .replace(/<Y>/g, '{{currentY}}')
-    .replace(/<Z>/g, '{{currentZ}}')
-    .replace(/<NEXTX>/g, '{{nextX}}')
-    .replace(/<NEXTY>/g, '{{nextY}}')
-    .replace(/<E>/g, '0')
-    .replace(/<DESTRING>/g, '{{retractDistance}}')
-    .replace(/<TEMP>/g, isStartSequence ? '{{firstLayerPrintTemperature}}' : '{{currentPrintTemperature}}')
-    .replace(/<BED>/g, isStartSequence ? '{{bedTemperature}}' : '{{currentBedTemperature}}')
-    .replace(/<LAYER>/g, '{{layer}}')
-    .replace(/<TELAPSED>/g, '{{timeElapsed}}')
-    .replace(/<TREMAIN>/g, '{{totalTime - timeElapsed}}')
-    .replace(/<TTOTAL>/g, '{{totalTime}}');
-  // enclose each line in quotes
-  const escaped = replaced.split('\n')
-    .map(line => `"${line.replace(/"/g, '\\"')}"`)
+  const converted = sequence
+    .trim()
+    .replace(/\r\n|\r|\n/g, '\n')
+    .split('\n')
+    .map((line) => {
+      const escaped = convertEscapes(line);
+      const converted = convertVariables(escaped, isStartSequence);
+      return `"${converted}"`;
+    })
     .join('\n');
-  // add directive
-  return `@printerscript 1.0\n${escaped}`;
+  return `@printerscript 1.0\n${converted}`;
 };
 
 const applyStartSequenceDefaults = (sequence, machine, primaryExtruder, bedTemp) => {
