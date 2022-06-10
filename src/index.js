@@ -333,12 +333,12 @@ const index = (input) => {
   } else {
     profile.supportMaterialExtruder = style.defaultSupportExtruder.value + 1;
   }
-  if (style.defaultSupportInterfaceExtruder === 'auto') {
-    profile.supportMaterialInterfaceExtruder = 0;
-  } else {
-    profile.supportMaterialInterfaceExtruder = style.defaultSupportInterfaceExtruder + 1;
-  }
   if (style.useSupportInterface) {
+    if (style.defaultSupportInterfaceExtruder === 'auto') {
+      profile.supportMaterialInterfaceExtruder = 0;
+    } else {
+      profile.supportMaterialInterfaceExtruder = style.defaultSupportInterfaceExtruder + 1;
+    }
     profile.supportMaterialInterfaceLayers = style.supportInterfaceThickness.value;
     if (style.supportInterfaceThickness.units === 'mm') {
       profile.supportMaterialInterfaceLayers *= style.layerHeight;
@@ -353,6 +353,7 @@ const index = (input) => {
       );
     }
   } else {
+    profile.supportMaterialInterfaceExtruder = profile.supportMaterialExtruder;
     profile.supportMaterialInterfaceLayers = 0;
   }
 
