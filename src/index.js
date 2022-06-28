@@ -442,8 +442,13 @@ const index = (input) => {
 
   // retraction
   for (let i = 0; i < extruderCount; i++) {
-    profile.retractLength[i] = getMaterialFieldValue(materials[i], 'retractLength', style.retractLength);
-    profile.retractLengthToolchange[i] = profile.retractLength[i];
+    if (style.useRetracts || style.useRetracts === undefined) {
+      profile.retractLength[i] = getMaterialFieldValue(materials[i], 'retractLength', style.retractLength);
+      profile.retractLengthToolchange[i] = profile.retractLength[i];
+    } else {
+      profile.retractLength[i] = 0;
+      profile.retractLengthToolchange[i] = 0;
+    }
     profile.retractSpeed[i] = getMaterialFieldValue(materials[i], 'retractSpeed', style.retractSpeed);
     if (!profile.useFirmwareRetraction) {
       profile.wipe[i] = getMaterialFieldValue(materials[i], 'wipeLength', style.wipeLength) > 0;
