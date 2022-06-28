@@ -434,6 +434,9 @@ const index = (input) => {
     } else {
       profile.fanAlwaysOn[i] = false;
       profile.cooling[i] = false;
+      profile.minFanSpeed[i] = 0;
+      profile.maxFanSpeed[i] = 0;
+      profile.bridgeFanSpeed[i] = 0;
     }
   }
 
