@@ -22,9 +22,14 @@ const convertVariables = (line, isStartSequence = false) => line
   .replace(/<TREMAIN>/g, '{{totalTime - timeElapsed}}')
   .replace(/<TTOTAL>/g, '{{totalTime}}');
 
+const directive = `@printerscript 1.0\n`;
+
 const convertToPrinterScript = (sequence, isStartSequence = false) => {
-  const converted = sequence
-    .trim()
+  const trimmed = sequence.trim();
+  if (trimmed.length === 0) {
+    return directive;
+  }
+  const converted = trimmed
     .replace(/\r\n|\r|\n/g, '\n')
     .split('\n')
     .map((line) => {
@@ -33,7 +38,7 @@ const convertToPrinterScript = (sequence, isStartSequence = false) => {
       return `"${converted}"`;
     })
     .join('\n');
-  return `@printerscript 1.0\n${converted}`;
+  return `${directive}${converted}`;
 };
 
 const applyStartSequenceDefaults = (sequence, machine, primaryExtruder, bedTemp) => {
