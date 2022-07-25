@@ -51,7 +51,7 @@ const convertSupportDensity = (density, extrusionWidth) => {
 };
 
 const densityToSpacing = (density, extrusionWidth) =>
-  roundTo((100 / density) * extrusionWidth, 2);
+  roundTo(((100 / density) - 1) * extrusionWidth, 2);
 
 // volume of a cylinder = pi * r^2 * h
 const filamentLengthToVolume = (length, diameter = 1.75) =>
