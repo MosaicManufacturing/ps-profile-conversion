@@ -500,6 +500,10 @@ const index = (input) => {
       // - https://github.com/prusa3d/PrusaSlicer/issues/599
       profile.supportMaterialContactDistance = 0;
       for (let i = 0; i < extruderCount; i++) {
+        // need to override "minimum travel before retraction" with towers because
+        // it takes precedence over "retract on layer change" and it's important
+        // for postprocessing that travel sequences are consistent
+        profile.retractBeforeTravel[i] = 0;
         if (materials[i].style.useTowerSpeed) {
           profile.towerSpeed[i] = materials[i].style.towerSpeed;
         } else if (style.towerSpeed && style.towerSpeed.value !== 'auto') {
