@@ -6,6 +6,10 @@
   "repository": {
     "url": "https://github.com/MosaicManufacturing/ps-profile-conversion"
   },
+  "files": [
+    "/src",
+    "package.json"
+  ],
   "license": "MIT",
   "scripts": {
     "lint": "./node_modules/.bin/eslint src"
