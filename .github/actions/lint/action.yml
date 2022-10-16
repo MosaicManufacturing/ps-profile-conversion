@@ -14,5 +14,7 @@ runs:
         cache: 'yarn'
     - run: yarn install
       shell: bash
+    - run: yarn tsc --noEmit
+      shell: bash
     - run: yarn lint
       shell: bash
