@@ -1,44 +1,50 @@
-const Profile = require('./profile');
+import { BrimType, GCodeFlavor, InfillPattern, SeamPosition, SolidFillPattern } from './enums';
+import Profile from './profile';
+import { applyStartSequenceDefaults, convertToPrinterScript } from './sequences';
+import type { Material } from './types/materials';
+import type { PaletteData } from './types/palette';
+import type { MachineSettings } from './types/printers';
+import type { StyleSettings } from './types/styles';
+import type { DriveColorStrength, TransitionTower, VariableTransitions } from './types/transitions';
+import {
+  getMaterialFieldValue,
+  getTransitionLength,
+  getVolumetricFlowRate,
+  RGBA,
+  rgbToHex,
+  roundTo,
+  validateArrayLengths,
+  variantValue,
+} from './utils';
 
-const {
-  SeamPositions, SolidFillPatterns, InfillPatterns, GCodeFlavors,
-  BrimTypes,
-} = require('./enums');
-const {
-  roundTo, rgbToHex, getTransitionLength,
-  getMaterialFieldValue, getVolumetricFlowRate,
-  validateArrayLengths, variantValue,
-} = require('./utils');
-const sequences = require('./sequences');
-
-const convertSolidFillStyle = (solidFillStyle) => {
+const convertSolidFillStyle = (solidFillStyle: number): SolidFillPattern => {
   switch (solidFillStyle) {
     case 0: // rectilinear
-      return SolidFillPatterns.RECTILINEAR;
+      return SolidFillPattern.RECTILINEAR;
     case 1: // monotonic
-      return SolidFillPatterns.MONOTONIC;
+      return SolidFillPattern.MONOTONIC;
     case 2: // concentric
-      return SolidFillPatterns.CONCENTRIC;
+      return SolidFillPattern.CONCENTRIC;
     default:
-      return SolidFillPatterns.RECTILINEAR;
+      return SolidFillPattern.RECTILINEAR;
   }
 };
 
-const convertInfillStyle = (infillStyle) => {
+const convertInfillStyle = (infillStyle: number): InfillPattern => {
   switch (infillStyle) {
     case 0: // straight
-      return InfillPatterns.RECTILINEAR;
+      return InfillPattern.RECTILINEAR;
     case 1: // octagonal
-      return InfillPatterns.HONEYCOMB_3D;
+      return InfillPattern.HONEYCOMB_3D;
     case 2: // rounded
     case 3: // cellular
-      return InfillPatterns.GYROID;
+      return InfillPattern.GYROID;
     default:
-      return InfillPatterns.RECTILINEAR;
+      return InfillPattern.RECTILINEAR;
   }
 };
 
-const convertSupportDensity = (density, extrusionWidth) => {
+const convertSupportDensity = (density: number, extrusionWidth: number): number => {
   switch (density) {
     case 2:
       return extrusionWidth * 10;
@@ -50,25 +56,34 @@ const convertSupportDensity = (density, extrusionWidth) => {
   }
 };
 
-const densityToSpacing = (density, extrusionWidth) =>
-  roundTo(((100 / density) - 1) * extrusionWidth, 2);
+const densityToSpacing = (density: number, extrusionWidth: number): number =>
+  roundTo((100 / density - 1) * extrusionWidth, 2);
 
 // volume of a cylinder = pi * r^2 * h
-const filamentLengthToVolume = (length, diameter = 1.75) =>
-  roundTo(((diameter / 2) ** 2) * Math.PI * length, 2);
+const filamentLengthToVolume = (length: number, diameter = 1.75): number =>
+  roundTo((diameter / 2) ** 2 * Math.PI * length, 2);
 
-const index = (input) => {
-  const {
-    machine,
-    style,
-    materials,
-    colors,
-    palette,
-    drivesUsed,
-    transitionTower,
-    variableTransitionLengths
-  } = input;
+interface Inputs {
+  machine: MachineSettings;
+  style: StyleSettings;
+  materials: Material[];
+  colors: RGBA[];
+  palette: PaletteData | null;
+  drivesUsed: boolean[];
+  transitionTower?: TransitionTower;
+  variableTransitionLengths?: VariableTransitions;
+}
 
+const index = ({
+  machine,
+  style,
+  materials,
+  colors,
+  palette,
+  drivesUsed,
+  transitionTower,
+  variableTransitionLengths,
+}: Inputs) => {
   // TODO: support dual-extruders here in the future?
   const extruderCount = palette ? palette.getInputCount() : 1;
 
@@ -79,19 +94,20 @@ const index = (input) => {
   // nozzle diameter(s)
   // filament diameters
   for (let i = 0; i < extruderCount; i++) {
+    const material = materials[i] as Material;
     const machineExtruderIndex = i >= machine.nozzleDiameter.length ? 0 : i;
-    profile.nozzleDiameter[i] = machine.nozzleDiameter[machineExtruderIndex];
-    if (materials[i].id === '0' && machine.filamentDiameter) {
-      profile.filamentDiameter[i] = machine.filamentDiameter[machineExtruderIndex];
+    profile.nozzleDiameter[i] = machine.nozzleDiameter[machineExtruderIndex] as number;
+    if (material.id === '0' && machine.filamentDiameter) {
+      profile.filamentDiameter[i] = machine.filamentDiameter[machineExtruderIndex] as number;
     } else {
-      profile.filamentDiameter[i] = materials[i].diameter;
+      profile.filamentDiameter[i] = material.diameter;
     }
   }
 
   // bed shape and Z-offset
   profile.bedCircular = machine.circular;
   profile.bedSize = [...machine.bedSize];
-  profile.originOffset = [...machine.originOffset];
+  profile.originOffset = [...machine.originOffset, 0];
   profile.zOffset = style.zOffset;
 
   // comments
@@ -120,8 +136,9 @@ const index = (input) => {
   if (profile.variableLayerHeight) {
     profile.layerHeight = style.layerHeight;
     profile.minLayerHeight = new Array(extruderCount).fill(style.layerHeight);
-    profile.maxLayerHeight = new Array(extruderCount)
-      .fill(variantValue(style.maxLayerHeight, style.layerHeight));
+    profile.maxLayerHeight = new Array(extruderCount).fill(
+      variantValue(style.maxLayerHeight, style.layerHeight)
+    );
   } else {
     profile.layerHeight = style.layerHeight;
     profile.minLayerHeight = new Array(extruderCount).fill(style.layerHeight);
@@ -136,7 +153,7 @@ const index = (input) => {
     profile.perimeterExtrusionWidth = variantValue(
       style.perimeterExtrusionWidth,
       style.extrusionWidth,
-      style.extrusionWidth,
+      style.extrusionWidth
     );
   } else {
     profile.perimeterExtrusionWidth = style.extrusionWidth;
@@ -145,7 +162,7 @@ const index = (input) => {
     profile.externalPerimeterExtrusionWidth = variantValue(
       style.externalPerimeterExtrusionWidth,
       style.extrusionWidth,
-      style.extrusionWidth,
+      style.extrusionWidth
     );
   } else {
     profile.externalPerimeterExtrusionWidth = style.extrusionWidth;
@@ -188,11 +205,11 @@ const index = (input) => {
     }
   }
   if (style.solidLayerStyle !== undefined) {
-    profile.bottomFillPattern = convertSolidFillStyle(style.solidLayerStyle);
+    profile.bottomFillPattern = convertSolidFillStyle(style.solidLayerStyle as number);
   } else if (style.monotonicSweep) {
-    profile.bottomFillPattern = SolidFillPatterns.MONOTONIC;
+    profile.bottomFillPattern = SolidFillPattern.MONOTONIC;
   } else {
-    profile.bottomFillPattern = SolidFillPatterns.RECTILINEAR;
+    profile.bottomFillPattern = SolidFillPattern.RECTILINEAR;
   }
   if (style.topSolidLayerStyle !== undefined && style.topSolidLayerStyle >= 0) {
     profile.topFillPattern = convertSolidFillStyle(style.topSolidLayerStyle);
@@ -223,17 +240,18 @@ const index = (input) => {
   profile.perimeters = style.perimeterCount;
   profile.externalPerimetersFirst = style.perimeterOrder === 0;
   if (style.seamOnCorners) {
-    profile.seamPosition = SeamPositions.NEAREST;
+    profile.seamPosition = SeamPosition.NEAREST;
   } else if (style.seamJitter) {
-    profile.seamPosition = SeamPositions.RANDOM;
+    profile.seamPosition = SeamPosition.RANDOM;
   } else if (style.seamAngle >= 45 && style.seamAngle <= 135) {
-    profile.seamPosition = SeamPositions.REAR;
+    profile.seamPosition = SeamPosition.REAR;
   }
   if (style.avoidCrossingPerimeters) {
     profile.avoidCrossingPerimeters = true;
-    profile.avoidCrossingPerimetersMaxDetour = style.avoidCrossingPerimetersMaxDetour.units === '%'
-      ? `${style.avoidCrossingPerimetersMaxDetour.value}%`
-      : style.avoidCrossingPerimetersMaxDetour.value;
+    profile.avoidCrossingPerimetersMaxDetour =
+      style.avoidCrossingPerimetersMaxDetour.units === '%'
+        ? `${style.avoidCrossingPerimetersMaxDetour.value}%`
+        : style.avoidCrossingPerimetersMaxDetour.value;
   }
   if (style.firstLayerSizeCompensation) {
     profile.elephantFootCompensation = style.firstLayerSizeCompensation;
@@ -241,7 +259,7 @@ const index = (input) => {
 
   // skirt/brim
   if (style.useBrim) {
-    profile.brimType = BrimTypes.OUTER_ONLY;
+    profile.brimType = BrimType.OUTER_ONLY;
     profile.brimWidth = style.brimLoops * profile.firstLayerExtrusionWidth;
     profile.brimSeparation = style.brimGap;
   }
@@ -257,11 +275,7 @@ const index = (input) => {
   profile.solidInfillSpeed = style.solidLayerSpeed;
   profile.topSolidInfillSpeed = profile.solidInfillSpeed;
   if (style.perimeterSpeed) {
-    profile.perimeterSpeed = variantValue(
-      style.perimeterSpeed,
-      style.solidLayerSpeed,
-      style.solidLayerSpeed,
-    );
+    profile.perimeterSpeed = variantValue(style.perimeterSpeed, style.solidLayerSpeed, style.solidLayerSpeed);
   } else {
     profile.perimeterSpeed = style.solidLayerSpeed;
   }
@@ -269,7 +283,7 @@ const index = (input) => {
     profile.externalPerimeterSpeed = variantValue(
       style.externalPerimeterSpeed,
       style.solidLayerSpeed,
-      style.solidLayerSpeed,
+      style.solidLayerSpeed
     );
   } else {
     profile.externalPerimeterSpeed = style.solidLayerSpeed;
@@ -291,7 +305,7 @@ const index = (input) => {
       profile.solidInfillSpeed,
       profile.topSolidInfillSpeed,
       profile.perimeterSpeed,
-      profile.externalPerimeterSpeed,
+      profile.externalPerimeterSpeed
     );
     profile.bridgeSpeed = Math.round(fastestSpeed / 2);
   }
@@ -301,10 +315,7 @@ const index = (input) => {
     profile.supportMaterialSpeed = style.solidLayerSpeed;
   }
   if (style.supportInterfaceSpeed && style.supportInterfaceSpeed.value !== 'auto') {
-    profile.supportMaterialInterfaceSpeed = variantValue(
-      style.supportInterfaceSpeed,
-      style.solidLayerSpeed,
-    );
+    profile.supportMaterialInterfaceSpeed = variantValue(style.supportInterfaceSpeed, style.solidLayerSpeed);
   } else {
     profile.supportMaterialInterfaceSpeed = style.solidLayerSpeed;
   }
@@ -312,10 +323,7 @@ const index = (input) => {
   // supports
   profile.supportMaterial = style.useSupport;
   profile.supportMaterialAuto = !style.useCustomSupports;
-  profile.supportMaterialSpacing = convertSupportDensity(
-    style.supportDensity,
-    profile.extrusionWidth,
-  );
+  profile.supportMaterialSpacing = convertSupportDensity(style.supportDensity, profile.extrusionWidth);
   if (style.useCustomSupports) {
     profile.supportMaterialThreshold = 90;
   } else {
@@ -334,11 +342,7 @@ const index = (input) => {
     profile.supportMaterialExtruder = style.defaultSupportExtruder.value + 1;
   }
   if (style.useSupportInterface) {
-    if (style.defaultSupportInterfaceExtruder === 'auto') {
-      profile.supportMaterialInterfaceExtruder = 0;
-    } else {
-      profile.supportMaterialInterfaceExtruder = style.defaultSupportInterfaceExtruder + 1;
-    }
+    profile.supportMaterialInterfaceExtruder = style.defaultSupportInterfaceExtruder + 1;
     profile.supportMaterialInterfaceLayers = style.supportInterfaceThickness.value;
     if (style.supportInterfaceThickness.units === 'mm') {
       profile.supportMaterialInterfaceLayers *= style.layerHeight;
@@ -349,7 +353,7 @@ const index = (input) => {
       // percentage
       profile.supportMaterialInterfaceSpacing = densityToSpacing(
         style.supportInterfaceDensity.value,
-        profile.extrusionWidth,
+        profile.extrusionWidth
       );
     }
   } else {
@@ -374,56 +378,71 @@ const index = (input) => {
   let bedTemperature = 0;
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
-      const bedTemperatureMaterial = getMaterialFieldValue(materials[i], 'bedTemperature', style.bedTemperature);
+      const bedTemperatureMaterial = getMaterialFieldValue(
+        materials[i] as Material,
+        'bedTemperature',
+        style.bedTemperature
+      );
       bedTemperature = Math.max(bedTemperature, bedTemperatureMaterial);
     }
   }
   for (let i = 0; i < extruderCount; i++) {
+    const material = materials[i] as Material;
     profile.bedTemperature[i] = bedTemperature;
     profile.firstLayerBedTemperature[i] = bedTemperature;
 
-    const printTemperatureMaterial = getMaterialFieldValue(materials[i], 'printTemperature', style.printTemperature);
+    const printTemperatureMaterial = getMaterialFieldValue(
+      material,
+      'printTemperature',
+      style.printTemperature
+    );
     profile.temperature[i] = printTemperatureMaterial;
 
     let firstLayerPrintTemperatureMaterial;
-    if (materials[i].style.useFirstLayerPrintTemperature) {
+    if (material.style.useFirstLayerPrintTemperature) {
       // material profile overrides first layer temperature
-      if (materials[i].style.firstLayerPrintTemperature.value === 'auto') {
+      if (material.style.firstLayerPrintTemperature.value === 'auto') {
         // 'auto' -- use the main temperature for this material
         firstLayerPrintTemperatureMaterial = printTemperatureMaterial;
       } else {
         // not 'auto' -- a value in °C is supplied
-        firstLayerPrintTemperatureMaterial = materials[i].style.firstLayerPrintTemperature.value;
+        firstLayerPrintTemperatureMaterial = material.style.firstLayerPrintTemperature.value;
       }
-    } else if (materials[i].style.usePrintTemperature) {
+    } else if (material.style.usePrintTemperature) {
       // no override for first layer temperature, but yes override for main temperature
       firstLayerPrintTemperatureMaterial = printTemperatureMaterial;
     } else {
       // no overrides at all -- use global first layer temperature
-      firstLayerPrintTemperatureMaterial = style.firstLayerPrintTemperature.value === 'auto'
-        ? printTemperatureMaterial
-        : style.firstLayerPrintTemperature.value;
+      firstLayerPrintTemperatureMaterial =
+        style.firstLayerPrintTemperature.value === 'auto'
+          ? printTemperatureMaterial
+          : style.firstLayerPrintTemperature.value;
     }
     profile.firstLayerTemperature[i] = firstLayerPrintTemperatureMaterial;
   }
 
   // extrusion multiplier
   for (let i = 0; i < extruderCount; i++) {
-    const extrusionMultiplierInt = getMaterialFieldValue(materials[i], 'extrusionMultiplier', style.extrusionMultiplier);
+    const extrusionMultiplierInt = getMaterialFieldValue(
+      materials[i] as Material,
+      'extrusionMultiplier',
+      style.extrusionMultiplier
+    );
     profile.extrusionMultiplier[i] = extrusionMultiplierInt / 100;
   }
 
   // cooling fan
   for (let i = 0; i < extruderCount; i++) {
+    const material = materials[i] as Material;
     profile.slowdownBelowLayerTime[i] = style.minLayerTime;
-    const useFan = getMaterialFieldValue(materials[i], 'useFan', style.useFan);
+    const useFan = getMaterialFieldValue(material, 'useFan', style.useFan);
     if (useFan) {
       profile.fanAlwaysOn[i] = true;
-      const fanSpeedMaterial = getMaterialFieldValue(materials[i], 'fanSpeed', style.fanSpeed);
+      const fanSpeedMaterial = getMaterialFieldValue(material, 'fanSpeed', style.fanSpeed);
       profile.minFanSpeed[i] = fanSpeedMaterial;
       profile.maxFanSpeed[i] = fanSpeedMaterial;
       profile.bridgeFanSpeed[i] = fanSpeedMaterial;
-      const fanLayerMaterial = getMaterialFieldValue(materials[i], 'enableFanAtLayer', style.enableFanAtLayer);
+      const fanLayerMaterial = getMaterialFieldValue(material, 'enableFanAtLayer', style.enableFanAtLayer);
       if (fanLayerMaterial <= 0) {
         profile.disableFanFirstLayers[i] = 0;
         profile.fullFanSpeedLayer[i] = 0;
@@ -442,27 +461,32 @@ const index = (input) => {
 
   // retraction
   for (let i = 0; i < extruderCount; i++) {
+    const material = materials[i] as Material;
     if (style.useRetracts || style.useRetracts === undefined) {
-      profile.retractLength[i] = getMaterialFieldValue(materials[i], 'retractLength', style.retractLength);
-      profile.retractLengthToolchange[i] = profile.retractLength[i];
+      const retractLength = getMaterialFieldValue(material, 'retractLength', style.retractLength);
+      profile.retractLength[i] = retractLength;
+      profile.retractLengthToolchange[i] = retractLength;
     } else {
       profile.retractLength[i] = 0;
       profile.retractLengthToolchange[i] = 0;
     }
-    profile.retractSpeed[i] = getMaterialFieldValue(materials[i], 'retractSpeed', style.retractSpeed);
+    profile.retractSpeed[i] = getMaterialFieldValue(material, 'retractSpeed', style.retractSpeed);
     if (!profile.useFirmwareRetraction) {
-      profile.wipe[i] = getMaterialFieldValue(materials[i], 'wipeLength', style.wipeLength) > 0;
+      profile.wipe[i] = getMaterialFieldValue(material, 'wipeLength', style.wipeLength) > 0;
     }
     profile.retractBeforeTravel[i] = style.retractDisableThreshold;
     profile.retractLift[i] = style.zLift;
     profile.retractLiftAbove[i] = 0;
-    profile.retractLiftBelow[i] = Math.floor(machine.bedSize[2] - (2 * profile.retractLift[i]));
+    profile.retractLiftBelow[i] = Math.floor(machine.bedSize[2] - 2 * style.zLift);
   }
 
   // max flowrate
   for (let i = 0; i < extruderCount; i++) {
-    const maxMaterialFlowrate = getMaterialFieldValue(materials[i], 'maxPrintSpeed', 0);
-    if (typeof maxMaterialFlowrate === 'object') {
+    const maxMaterialFlowrate = getMaterialFieldValue(materials[i] as Material, 'maxPrintSpeed', {
+      units: 'mm/s',
+      value: 0,
+    });
+    if (maxMaterialFlowrate.value > 0) {
       if (maxMaterialFlowrate.units === 'mm3/s') {
         profile.filamentMaxVolumetricSpeed[i] = maxMaterialFlowrate.value;
       } else {
@@ -470,25 +494,19 @@ const index = (input) => {
         profile.filamentMaxVolumetricSpeed[i] = getVolumetricFlowRate(
           maxMaterialFlowrate.value,
           style.layerHeight,
-          style.extrusionWidth,
+          style.extrusionWidth
         );
       }
-    } else if (maxMaterialFlowrate > 0) {
-      // mm/s
-      profile.filamentMaxVolumetricSpeed[i] = getVolumetricFlowRate(
-        maxMaterialFlowrate,
-        style.layerHeight,
-        style.extrusionWidth,
-      );
     }
   }
 
   // material names and colors
   for (let i = 0; i < extruderCount; i++) {
-    const hexColor = `#${rgbToHex(colors[i])}`;
+    const material = materials[i] as Material;
+    const hexColor = `#${rgbToHex(colors[i] as RGBA)}`;
     profile.filamentColor[i] = hexColor;
     profile.extruderColor[i] = hexColor;
-    profile.filamentSettingsId[i] = materials[i].name;
+    profile.filamentSettingsId[i] = material.name;
   }
 
   // transition settings
@@ -500,12 +518,13 @@ const index = (input) => {
       // - https://github.com/prusa3d/PrusaSlicer/issues/599
       profile.supportMaterialContactDistance = 0;
       for (let i = 0; i < extruderCount; i++) {
+        const material = materials[i] as Material;
         // need to override "minimum travel before retraction" with towers because
         // it takes precedence over "retract on layer change" and it's important
         // for postprocessing that travel sequences are consistent
         profile.retractBeforeTravel[i] = 0;
-        if (materials[i].style.useTowerSpeed) {
-          profile.towerSpeed[i] = materials[i].style.towerSpeed;
+        if (material.style.useTowerSpeed) {
+          profile.towerSpeed[i] = material.style.towerSpeed;
         } else if (style.towerSpeed && style.towerSpeed.value !== 'auto') {
           profile.towerSpeed[i] = style.towerSpeed.value;
         } else {
@@ -515,8 +534,7 @@ const index = (input) => {
       if (style.towerExtrusionWidth && style.towerExtrusionWidth.units === 'mm') {
         profile.towerExtrusionWidth = style.towerExtrusionWidth.value;
       } else {
-        profile.towerExtrusionWidth = Math
-          .max(profile.extrusionWidth, profile.infillExtrusionWidth);
+        profile.towerExtrusionWidth = Math.max(profile.extrusionWidth, profile.infillExtrusionWidth);
       }
     } else {
       // side transitions
@@ -529,28 +547,21 @@ const index = (input) => {
       for (let i = 0; i < extruderCount; i++) {
         for (let j = 0; j < extruderCount; j++) {
           if (i !== j) {
-            profile.wipingVolumesMatrix[i][j] = (
-              filamentLengthToVolume(variableTransitionLengths.transitionLengths[i][j])
+            (profile.wipingVolumesMatrix[i] as number[])[j] = filamentLengthToVolume(
+              (variableTransitionLengths.transitionLengths[i] as number[])[j] as number
             );
           }
         }
       }
     } else {
-      const {
-        driveColorStrengths, minTransitionLength, maxTransitionLength
-      } = variableTransitionLengths;
+      const { driveColorStrengths, minTransitionLength, maxTransitionLength } = variableTransitionLengths;
       for (let ingoing = 0; ingoing < driveColorStrengths.length; ingoing++) {
         for (let outgoing = 0; outgoing < driveColorStrengths.length; outgoing++) {
           if (ingoing !== outgoing) {
-            const ingoingStrength = driveColorStrengths[ingoing];
-            const outgoingStrength = driveColorStrengths[outgoing];
-            profile.wipingVolumesMatrix[ingoing][outgoing] = (
-              filamentLengthToVolume(getTransitionLength(
-                ingoingStrength,
-                outgoingStrength,
-                minTransitionLength,
-                maxTransitionLength
-              ))
+            const ingoingStrength = driveColorStrengths[ingoing] as DriveColorStrength;
+            const outgoingStrength = driveColorStrengths[outgoing] as DriveColorStrength;
+            (profile.wipingVolumesMatrix[ingoing] as number[])[outgoing] = filamentLengthToVolume(
+              getTransitionLength(ingoingStrength, outgoingStrength, minTransitionLength, maxTransitionLength)
             );
           }
         }
@@ -564,7 +575,7 @@ const index = (input) => {
       profile.wipingVolumesExtruders[i] = [halfTransitionVolume, halfTransitionVolume];
       for (let j = 0; j < extruderCount; j++) {
         if (i !== j) {
-          profile.wipingVolumesMatrix[i][j] = transitionVolume;
+          (profile.wipingVolumesMatrix[i] as number[])[j] = transitionVolume;
         }
       }
     }
@@ -579,16 +590,16 @@ const index = (input) => {
   // (must happen after everything but G-code sequences)
   switch (machine.extension) {
     case 'mcfx':
-      profile.firmwareRetraction = false;
+      profile.useFirmwareRetraction = false;
       profile.gcodeComments = false;
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
-      profile.firmwareRetraction = false;
+      profile.useFirmwareRetraction = false;
       break;
     case 'x3g':
-      profile.gcodeFlavor = GCodeFlavors.MAKERWARE;
-      profile.firmwareRetraction = false;
+      profile.gcodeFlavor = GCodeFlavor.MAKERWARE;
+      profile.useFirmwareRetraction = false;
       break;
     default:
       break;
@@ -611,14 +622,13 @@ const index = (input) => {
   if (machine.startSequence.startsWith('@printerscript')) {
     profile.startGcodePrinterscript = machine.startSequence;
   } else {
-    profile.startGcodePrinterscript = sequences.convertToPrinterScript(machine.startSequence, true);
+    profile.startGcodePrinterscript = convertToPrinterScript(machine.startSequence, true);
   }
   // apply start sequence defaults
-  profile.startGcodePrinterscript = sequences.applyStartSequenceDefaults(
+  profile.startGcodePrinterscript = applyStartSequenceDefaults(
     profile.startGcodePrinterscript,
-    machine,
     palette ? palette.extruder : 0,
-    bedTemperature,
+    bedTemperature
   );
 
   // end sequence
@@ -626,7 +636,7 @@ const index = (input) => {
   if (machine.endSequence.startsWith('@printerscript')) {
     profile.endGcodePrinterscript = machine.endSequence;
   } else {
-    profile.endGcodePrinterscript = sequences.convertToPrinterScript(machine.endSequence);
+    profile.endGcodePrinterscript = convertToPrinterScript(machine.endSequence);
   }
 
   // layer change sequence
@@ -635,20 +645,19 @@ const index = (input) => {
     if (machine.layerChangeSequence.startsWith('@printerscript')) {
       profile.layerGcodePrinterscript = machine.layerChangeSequence;
     } else {
-      profile.layerGcodePrinterscript = sequences
-        .convertToPrinterScript(machine.layerChangeSequence);
+      profile.layerGcodePrinterscript = convertToPrinterScript(machine.layerChangeSequence);
     }
   }
 
   // material change sequence
   for (let i = 0; i < extruderCount; i++) {
-    if (materials[i].materialChangeSequence) {
+    const material = materials[i] as Material;
+    if (material.materialChangeSequence) {
       profile.startFilamentGcode[i] = `;*/*/*/*/* MATERIAL CHANGE SEQUENCE (${i}) */*/*/*/*`;
-      if (materials[i].materialChangeSequence.startsWith('@printerscript')) {
-        profile.startFilamentGcodePrinterscript[i] = materials[i].materialChangeSequence;
+      if (material.materialChangeSequence.startsWith('@printerscript')) {
+        profile.startFilamentGcodePrinterscript[i] = material.materialChangeSequence;
       } else {
-        profile.startFilamentGcodePrinterscript[i] = sequences
-          .convertToPrinterScript(materials[i].materialChangeSequence);
+        profile.startFilamentGcodePrinterscript[i] = convertToPrinterScript(material.materialChangeSequence);
       }
     }
   }
@@ -658,8 +667,7 @@ const index = (input) => {
       if (machine.preSideTransitionSequence.startsWith('@printerscript')) {
         profile.preSideTransitionPrinterscript = machine.preSideTransitionSequence;
       } else {
-        profile.preSideTransitionPrinterscript = sequences
-          .convertToPrinterScript(machine.preSideTransitionSequence);
+        profile.preSideTransitionPrinterscript = convertToPrinterScript(machine.preSideTransitionSequence);
       }
     }
     if (machine.sideTransitionSequence) {
@@ -669,8 +677,7 @@ const index = (input) => {
       if (machine.postSideTransitionSequence.startsWith('@printerscript')) {
         profile.postSideTransitionPrinterscript = machine.postSideTransitionSequence;
       } else {
-        profile.postSideTransitionPrinterscript = sequences
-          .convertToPrinterScript(machine.postSideTransitionSequence);
+        profile.postSideTransitionPrinterscript = convertToPrinterScript(machine.postSideTransitionSequence);
       }
     }
   }
@@ -678,4 +685,4 @@ const index = (input) => {
   return profile;
 };
 
-module.exports = index;
+export default index;

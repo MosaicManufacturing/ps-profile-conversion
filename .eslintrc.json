@@ -1,0 +1,38 @@
+{
+  "root": true,
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "env": {
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
+  "rules": {
+    "no-plusplus": "off",
+    "sort-imports": ["error", { "ignoreCase": true, "ignoreDeclarationSort": true }],
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "parent", "sibling", "index"],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": false
+        },
+        "newlines-between": "always"
+      }
+    ],
+    "prettier/prettier": "warn"
+  }
+}

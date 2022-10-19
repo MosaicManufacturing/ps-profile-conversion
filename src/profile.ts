@@ -1,65 +1,320 @@
-const { roundTo, boolToIntString } = require('./utils');
-const {
-  GCodeFlavors, MachineLimitsUsage,
-  InfillPatterns, SolidFillPatterns, SupportPatterns,
-  IroningTypes, SeamPositions, BrimTypes,
-  DraftShieldModes, FuzzySkinTypes,
-  SupportStyles, SupportInterfacePatterns,
-} = require('./enums');
+import {
+  BrimType,
+  DraftShieldMode,
+  FuzzySkinType,
+  GCodeFlavor,
+  InfillPattern,
+  IroningType,
+  MachineLimitsUsage,
+  SeamPosition,
+  SolidFillPattern,
+  SupportInterfacePattern,
+  SupportPattern,
+  SupportStyle,
+} from './enums';
+import { boolToIntString, roundTo } from './utils';
 
-class Profile {
-  constructor(extruderCount) {
-    this.avoidCrossingPerimeters = false;
-    this.avoidCrossingPerimetersMaxDetour = 0;
-    this.bedCircular = false;
-    this.bedSize = [250, 250, 210];
-    this.originOffset = [0, 0, 0];
+type Nil = 'nil';
+
+export default class Profile {
+  avoidCrossingPerimeters = false;
+  avoidCrossingPerimetersMaxDetour: number | string = 0;
+  bedCircular = false;
+  bedSize: [number, number, number] = [250, 250, 210];
+  originOffset: [number, number, number] = [0, 0, 0];
+  bedTemperature: number[];
+  beforeLayerGcode = '';
+  betweenObjectsGcode = '';
+  bottomFillPattern = SolidFillPattern.MONOTONIC;
+  bottomSolidLayers = 4;
+  bottomSolidMinThickness = 0.5;
+  bridgeAcceleration = 1000;
+  bridgeAngle = 0;
+  bridgeFanSpeed: number[];
+  bridgeFlowRatio = 0.95;
+  bridgeSpeed = 30;
+  brimSeparation = 0.1;
+  brimType = BrimType.NO_BRIM;
+  brimWidth = 0;
+  clipMultipartObjects = true;
+  colorChangeGcode = 'M600';
+  colorPrintHeights = [];
+  compatiblePrintersConditionCumulative = '';
+  completeObjects = false;
+  cooling: boolean[];
+  coolingTubeLength = 0;
+  coolingTubeRetraction = 0;
+  defaultAcceleration = 1000;
+  defaultFilamentProfile = '';
+  defaultPrintProfile = '';
+  deretractSpeed: number[];
+  disableFanFirstLayers: number[];
+  dontSupportBridges = true;
+  draftShield = DraftShieldMode.DISABLED;
+  duplicateDistance = 6;
+  elephantFootCompensation = 0;
+  endFilamentGcode: string[];
+  endGcode = '';
+  ensureVerticalShellThickness = true;
+  externalPerimeterExtrusionWidth = 0.45;
+  externalPerimeterSpeed = 25;
+  externalPerimetersFirst = false;
+  extraLoadingMove = 0;
+  extraPerimeters = false;
+  extruderClearanceHeight = 20;
+  extruderClearanceRadius = 45;
+  extruderColor: string[];
+  extruderOffset: [number, number][];
+  extrusionAxis = 'E';
+  extrusionMultiplier: number[];
+  extrusionWidth = 0.45;
+  fanAlwaysOn: boolean[];
+  fanBelowLayerTime: number[];
+  filamentColor: string[];
+  filamentCoolingFinalSpeed: number[];
+  filamentCoolingInitialSpeed: number[];
+  filamentCoolingMoves: number[];
+  filamentCost: number[];
+  filamentDensity: number[];
+  filamentDeretractSpeed: Nil[];
+  filamentDiameter: number[];
+  filamentLoadTime: number[];
+  filamentLoadingSpeed: number[];
+  filamentLoadingSpeedStart: number[];
+  filamentMaxVolumetricSpeed: number[];
+  filamentMinimalPurgeOnWipeTower: number[];
+  filamentNotes: string[];
+  filamentRammingParameters: string[];
+  filamentRetractBeforeTravel: Nil[];
+  filamentRetractBeforeWipe: Nil[];
+  filamentRetractLayerChange: Nil[];
+  filamentRetractLength: Nil[];
+  filamentRetractLift: Nil[];
+  filamentRetractLiftAbove: Nil[];
+  filamentRetractLiftBelow: Nil[];
+  filamentRetractRestartExtra: Nil[];
+  filamentRetractSpeed: Nil[];
+  filamentSettingsId: string[];
+  filamentSoluble: boolean[];
+  filamentSpoolWeight: number[];
+  filamentToolchangeDelay: number[];
+  filamentType: string[];
+  filamentUnloadTime: number[];
+  filamentUnloadingSpeed: number[];
+  filamentUnloadingSpeedStart: number[];
+  filamentVendor = 'Generic';
+  filamentWipe: Nil[];
+  fillAngle = 45;
+  fillDensity = 15;
+  fillPattern = InfillPattern.RECTILINEAR;
+  firstLayerAcceleration = 1000;
+  firstLayerAccelerationOverRaft = 0;
+  firstLayerBedTemperature: number[];
+  firstLayerExtrusionWidth = 0.42;
+  firstLayerHeight = 0.2;
+  firstLayerSpeed = 20;
+  firstLayerSpeedOverRaft = 0;
+  firstLayerTemperature: number[];
+  fullFanSpeedLayer: number[];
+  fuzzySkin = FuzzySkinType.NONE;
+  fuzzySkinPointDistance = 0.8;
+  fuzzySkinThickness = 0.3;
+  gapFillEnabled = true;
+  gapFillSpeed = 40;
+  gcodeComments = false;
+  gcodeFlavor = GCodeFlavor.REPRAP_SPRINTER;
+  gcodeLabelObjects = true; // currently required for Palette postprocessing
+  gcodeResolution = 0.0125;
+  highCurrentOnFilamentSwap = false;
+  hostType = 'octoprint';
+  infillAcceleration = 1000;
+  infillAnchor = 2.5;
+  infillAnchorMax = 12;
+  infillEveryLayers = 1;
+  infillExtruder = 1;
+  infillExtrusionWidth = 0.45;
+  infillFirst = false;
+  infillOnlyWhereNeeded = false;
+  infillOverlap = 25;
+  infillSpeed = 80;
+  interfaceShells = false;
+  ironing = false;
+  ironingFlowrate = 15;
+  ironingSpacing = 0.1;
+  ironingSpeed = 15;
+  ironingType = IroningType.ALL_TOP_SURFACES;
+  layerGcode = '';
+  layerHeight = 0.2;
+  machineLimitsUsage = MachineLimitsUsage.EMIT_TO_GCODE;
+  machineMaxAccelerationE = [5000, 5000]; // [normal, stealth]
+  machineMaxAccelerationExtruding = [1250, 1250]; // [normal, stealth]
+  machineMaxAccelerationRetracting = [1250, 1250]; // [normal, stealth]
+  machineMaxAccelerationTravel = [1500, 1250]; // [normal, stealth]
+  machineMaxAccelerationX = [1000, 960]; // [normal, stealth]
+  machineMaxAccelerationY = [1000, 960]; // [normal, stealth]
+  machineMaxAccelerationZ = [200, 200]; // [normal, stealth]
+  machineMaxFeedrateE = [120, 120]; // [normal, stealth]
+  machineMaxFeedrateX = [200, 100]; // [normal, stealth]
+  machineMaxFeedrateY = [200, 100]; // [normal, stealth]
+  machineMaxFeedrateZ = [12, 12]; // [normal, stealth]
+  machineMaxJerkE = [4.5, 4.5]; // [normal, stealth]
+  machineMaxJerkX = [8, 8]; // [normal, stealth]
+  machineMaxJerkY = [8, 8]; // [normal, stealth]
+  machineMaxJerkZ = [0.4, 0.4]; // [normal, stealth]
+  machineMinExtrudingRate = [0, 0]; // [normal, stealth]
+  machineMinTravelRate = [0, 0]; // [normal, stealth]
+  maxFanSpeed: number[];
+  maxLayerHeight: number[];
+  maxPrintSpeed = 200;
+  maxVolumetricSpeed = 0;
+  minFanSpeed: number[];
+  minLayerHeight: number[];
+  minPrintSpeed: number[];
+  minSkirtLength = 4;
+  mmuSegmentedRegionMaxWidth = 0;
+  notes = '';
+  nozzleDiameter: number[];
+  onlyRetractWhenCrossingPerimeters = false;
+  oozePrevention = false;
+  outputFilenameFormat =
+    '{input_filename_base}_{layer_height}mm_{filament_type[0]}_{printer_model}_{print_time}.gcode';
+  overhangs = true; // 'Detect Bridging Perimeters'
+  parkingPosRetraction = 0;
+  pausePrintGcode = 'M601';
+  perimeterAcceleration = 800;
+  perimeterExtruder = 1;
+  perimeterExtrusionWidth = 0.45;
+  perimeterSpeed = 45;
+  perimeters = 2;
+  physicalPrinterSettingsId = '';
+  postProcess = '';
+  printSettingsId = '';
+  printerModel = '';
+  printerNotes = '';
+  printerSettingsId = '';
+  printerTechnology = 'FFF';
+  printerVariant = '';
+  printerVendor = '';
+  raftContactDistance = 0.2;
+  raftExpansion = 1.5;
+  raftFirstLayerDensity = 90;
+  raftFirstLayerExpansion = 3;
+  raftLayers = 0;
+  remainingTimes = false;
+  resolution = 0;
+  retractBeforeTravel: number[];
+  retractBeforeWipe: number[];
+  retractLayerChange: boolean[];
+  retractLength: number[];
+  retractLengthToolchange: number[];
+  retractLift: number[];
+  retractLiftAbove: number[];
+  retractLiftBelow: number[];
+  retractRestartExtra: number[];
+  retractRestartExtraToolchange: number[];
+  retractSpeed: number[];
+  seamPosition = SeamPosition.NEAREST;
+  silentMode = false;
+  singleExtruderMultiMaterial = true;
+  singleExtruderMultiMaterialPriming = false;
+  skirtDistance = 2;
+  skirtHeight = 3;
+  skirts = 0;
+  sliceClosingRadius = 0.049;
+  slicingMode = 'regular';
+  slowdownBelowLayerTime: number[];
+  smallPerimeterSpeed = 0;
+  solidInfillBelowArea = 0;
+  solidInfillEveryLayers = 0;
+  solidInfillExtruder = 1;
+  solidInfillExtrusionWidth = 0.45;
+  solidInfillSpeed = 80;
+  spiralVase = false;
+  standbyTemperatureDelta = -5;
+  startFilamentGcode: string[];
+  startGcode = '';
+  supportMaterial = false;
+  supportMaterialAngle = 0;
+  supportMaterialAuto = true;
+  supportMaterialBottomContactDistance = -1; // -1 == use same setting as top interfaces
+  supportMaterialBottomInterfaceLayers = -1; // -1 == use same setting as top interfaces
+  supportMaterialBuildplateOnly = false;
+  supportMaterialClosingRadius = 2;
+  supportMaterialContactDistance = 0;
+  supportMaterialEnforceLayers = 0;
+  supportMaterialExtruder = 0; // 0 == use current extruder
+  supportMaterialExtrusionWidth = 0.35;
+  supportMaterialInterfaceContactLoops = false;
+  supportMaterialInterfaceExtruder = 0; // 0 == use current extruder
+  supportMaterialInterfaceLayers = 0;
+  supportMaterialInterfacePattern = SupportInterfacePattern.RECTILINEAR;
+  supportMaterialInterfaceSpacing = 0.2;
+  supportMaterialInterfaceSpeed = 80;
+  supportMaterialPattern = SupportPattern.RECTILINEAR;
+  supportMaterialSpacing = 2;
+  supportMaterialSpeed = 50;
+  supportMaterialStyle = SupportStyle.GRID;
+  supportMaterialSynchronizeLayers = false;
+  supportMaterialThreshold = 55;
+  supportMaterialWithSheath = false;
+  supportMaterialXYSpacing: number | string = '50%';
+  temperature: number[];
+  templateCustomGcode = '';
+  thickBridges = false;
+  thinWalls = true;
+  threads = 20;
+  thumbnails: [number, number][] = [];
+  toolchangeGcode = '';
+  topFillPattern = SolidFillPattern.MONOTONIC;
+  topInfillExtrusionWidth = 0.4;
+  topSolidInfillSpeed = 40;
+  topSolidLayers = 5;
+  topSolidMinThickness = 0.7;
+  travelSpeed = 180;
+  travelSpeedZ = 180;
+  useFirmwareRetraction = false;
+  useRelativeEDistances = false;
+  useVolumetricE = false;
+  variableLayerHeight = false;
+  wipe: boolean[];
+  wipeIntoInfill = false;
+  wipeIntoObjects = false;
+  wipeTower = false;
+  wipeTowerBridging = 10;
+  wipeTowerBrimWidth = 2;
+  wipeTowerNoSparseLayers = false;
+  wipeTowerRotationAngle = 0;
+  wipeTowerWidth = 60;
+  wipeTowerX = 180;
+  wipeTowerY = 140;
+  wipingVolumesExtruders: [number, number][];
+  wipingVolumesMatrix: number[][];
+  xySizeCompensation = 0;
+  zOffset = 0;
+
+  // not used by PrusaSlicer
+  clearBufferCommand = 'G4 P0';
+  towerSpeed: number[];
+  towerExtrusionWidth = 0.45;
+  layerGcodePrinterscript = '';
+  endGcodePrinterscript = '';
+  startFilamentGcodePrinterscript: string[];
+  startGcodePrinterscript = '';
+  preSideTransitionPrinterscript = '';
+  sideTransitionPrinterscript = '';
+  postSideTransitionPrinterscript = '';
+
+  constructor(extruderCount: number) {
     this.bedTemperature = new Array(extruderCount).fill(0);
-    this.beforeLayerGcode = '';
-    this.betweenObjectsGcode = '';
-    this.bottomFillPattern = SolidFillPatterns.MONOTONIC;
-    this.bottomSolidLayers = 4;
-    this.bottomSolidMinThickness = 0.5;
-    this.bridgeAcceleration = 1000;
-    this.bridgeAngle = 0;
+    this.bottomFillPattern = SolidFillPattern.MONOTONIC;
     this.bridgeFanSpeed = new Array(extruderCount).fill(100);
-    this.bridgeFlowRatio = 0.95;
-    this.bridgeSpeed = 30;
-    this.brimSeparation = 0.1;
-    this.brimType = BrimTypes.NO_BRIM;
-    this.brimWidth = 0;
-    this.clipMultipartObjects = true;
-    this.colorChangeGcode = 'M600';
-    this.colorPrintHeights = [];
-    this.compatiblePrintersConditionCumulative = '';
-    this.completeObjects = false;
     this.cooling = new Array(extruderCount).fill(true);
-    this.coolingTubeLength = 0;
-    this.coolingTubeRetraction = 0;
-    this.defaultAcceleration = 1000;
-    this.defaultFilamentProfile = '';
-    this.defaultPrintProfile = '';
     this.deretractSpeed = new Array(extruderCount).fill(0);
     this.disableFanFirstLayers = new Array(extruderCount).fill(1);
-    this.dontSupportBridges = true;
-    this.draftShield = DraftShieldModes.DISABLED;
-    this.duplicateDistance = 6;
-    this.elephantFootCompensation = 0;
     this.endFilamentGcode = new Array(extruderCount).fill('');
-    this.endGcode = '';
-    this.ensureVerticalShellThickness = true;
-    this.externalPerimeterExtrusionWidth = 0.45;
-    this.externalPerimeterSpeed = 25;
-    this.externalPerimetersFirst = false;
-    this.extraLoadingMove = 0;
-    this.extraPerimeters = false;
-    this.extruderClearanceHeight = 20;
-    this.extruderClearanceRadius = 45;
     this.extruderColor = new Array(extruderCount).fill('#000000');
     this.extruderOffset = new Array(extruderCount).fill(0).map(() => [0, 0]);
-    this.extrusionAxis = 'E';
     this.extrusionMultiplier = new Array(extruderCount).fill(1);
-    this.extrusionWidth = 0.45;
     this.fanAlwaysOn = new Array(extruderCount).fill(true);
     this.fanBelowLayerTime = new Array(extruderCount).fill(100);
     this.filamentColor = new Array(extruderCount).fill('#000000');
@@ -94,105 +349,16 @@ class Profile {
     this.filamentUnloadTime = new Array(extruderCount).fill(0);
     this.filamentUnloadingSpeed = new Array(extruderCount).fill(0);
     this.filamentUnloadingSpeedStart = new Array(extruderCount).fill(0);
-    this.filamentVendor = 'Generic';
     this.filamentWipe = new Array(extruderCount).fill('nil');
-    this.fillAngle = 45;
-    this.fillDensity = 15;
-    this.fillPattern = InfillPatterns.RECTILINEAR;
-    this.firstLayerAcceleration = 1000;
-    this.firstLayerAccelerationOverRaft = 0;
     this.firstLayerBedTemperature = new Array(extruderCount).fill(0);
-    this.firstLayerExtrusionWidth = 0.42;
-    this.firstLayerHeight = 0.2;
-    this.firstLayerSpeed = 20;
-    this.firstLayerSpeedOverRaft = 0;
     this.firstLayerTemperature = new Array(extruderCount).fill(215);
     this.fullFanSpeedLayer = new Array(extruderCount).fill(4);
-    this.fuzzySkin = FuzzySkinTypes.NONE;
-    this.fuzzySkinPointDistance = 0.8;
-    this.fuzzySkinThickness = 0.3;
-    this.gapFillEnabled = true;
-    this.gapFillSpeed = 40;
-    this.gcodeComments = false;
-    this.gcodeFlavor = GCodeFlavors.REPRAP_SPRINTER;
-    this.gcodeLabelObjects = true; // currently required for Palette postprocessing
-    this.gcodeResolution = 0.0125;
-    this.highCurrentOnFilamentSwap = false;
-    this.hostType = 'octoprint';
-    this.infillAcceleration = 1000;
-    this.infillAnchor = 2.5;
-    this.infillAnchorMax = 12;
-    this.infillEveryLayers = 1;
-    this.infillExtruder = 1;
-    this.infillExtrusionWidth = 0.45;
-    this.infillFirst = false;
-    this.infillOnlyWhereNeeded = false;
-    this.infillOverlap = 25;
-    this.infillSpeed = 80;
-    this.interfaceShells = false;
-    this.ironing = false;
-    this.ironingFlowrate = 15;
-    this.ironingSpacing = 0.1;
-    this.ironingSpeed = 15;
-    this.ironingType = IroningTypes.ALL_TOP_SURFACES;
-    this.layerGcode = '';
-    this.layerHeight = 0.2;
-    this.machineLimitsUsage = MachineLimitsUsage.EMIT_TO_GCODE;
-    this.machineMaxAccelerationE = [5000, 5000]; // [normal, stealth]
-    this.machineMaxAccelerationExtruding = [1250, 1250]; // [normal, stealth]
-    this.machineMaxAccelerationRetracting = [1250, 1250]; // [normal, stealth]
-    this.machineMaxAccelerationTravel = [1500, 1250]; // [normal, stealth]
-    this.machineMaxAccelerationX = [1000, 960]; // [normal, stealth]
-    this.machineMaxAccelerationY = [1000, 960]; // [normal, stealth]
-    this.machineMaxAccelerationZ = [200, 200]; // [normal, stealth]
-    this.machineMaxFeedrateE = [120, 120]; // [normal, stealth]
-    this.machineMaxFeedrateX = [200, 100]; // [normal, stealth]
-    this.machineMaxFeedrateY = [200, 100]; // [normal, stealth]
-    this.machineMaxFeedrateZ = [12, 12]; // [normal, stealth]
-    this.machineMaxJerkE = [4.5, 4.5]; // [normal, stealth]
-    this.machineMaxJerkX = [8, 8]; // [normal, stealth]
-    this.machineMaxJerkY = [8, 8]; // [normal, stealth]
-    this.machineMaxJerkZ = [0.4, 0.4]; // [normal, stealth]
-    this.machineMinExtrudingRate = [0, 0]; // [normal, stealth]
-    this.machineMinTravelRate = [0, 0]; // [normal, stealth]
     this.maxFanSpeed = new Array(extruderCount).fill(100);
     this.maxLayerHeight = new Array(extruderCount).fill(0.25);
-    this.maxPrintSpeed = 200;
-    this.maxVolumetricSpeed = 0;
     this.minFanSpeed = new Array(extruderCount).fill(100);
     this.minLayerHeight = new Array(extruderCount).fill(0.07);
     this.minPrintSpeed = new Array(extruderCount).fill(15);
-    this.minSkirtLength = 4;
-    this.mmuSegmentedRegionMaxWidth = 0;
-    this.notes = '';
     this.nozzleDiameter = new Array(extruderCount).fill(0.4);
-    this.onlyRetractWhenCrossingPerimeters = false;
-    this.oozePrevention = false;
-    this.outputFilenameFormat = '{input_filename_base}_{layer_height}mm_{filament_type[0]}_{printer_model}_{print_time}.gcode';
-    this.overhangs = true; // 'Detect Bridging Perimeters'
-    this.parkingPosRetraction = 0;
-    this.pausePrintGcode = 'M601';
-    this.perimeterAcceleration = 800;
-    this.perimeterExtruder = 1;
-    this.perimeterExtrusionWidth = 0.45;
-    this.perimeterSpeed = 45;
-    this.perimeters = 2;
-    this.physicalPrinterSettingsId = '';
-    this.postProcess = '';
-    this.printSettingsId = '';
-    this.printerModel = '';
-    this.printerNotes = '';
-    this.printerSettingsId = '';
-    this.printerTechnology = 'FFF';
-    this.printerVariant = '';
-    this.printerVendor = '';
-    this.raftContactDistance = 0.2;
-    this.raftExpansion = 1.5;
-    this.raftFirstLayerDensity = 90;
-    this.raftFirstLayerExpansion = 3;
-    this.raftLayers = 0;
-    this.remainingTimes = false;
-    this.resolution = 0;
     this.retractBeforeTravel = new Array(extruderCount).fill(2);
     this.retractBeforeWipe = new Array(extruderCount).fill(0);
     this.retractLayerChange = new Array(extruderCount).fill(true);
@@ -204,98 +370,16 @@ class Profile {
     this.retractRestartExtra = new Array(extruderCount).fill(0);
     this.retractRestartExtraToolchange = new Array(extruderCount).fill(0);
     this.retractSpeed = new Array(extruderCount).fill(35);
-    this.seamPosition = SeamPositions.NEAREST;
-    this.silentMode = false;
-    this.singleExtruderMultiMaterial = true;
-    this.singleExtruderMultiMaterialPriming = false;
-    this.skirtDistance = 2;
-    this.skirtHeight = 3;
-    this.skirts = 0;
-    this.sliceClosingRadius = 0.049;
-    this.slicingMode = 'regular';
     this.slowdownBelowLayerTime = new Array(extruderCount).fill(15);
-    this.smallPerimeterSpeed = 0;
-    this.solidInfillBelowArea = 0;
-    this.solidInfillEveryLayers = 0;
-    this.solidInfillExtruder = 1;
-    this.solidInfillExtrusionWidth = 0.45;
-    this.solidInfillSpeed = 80;
-    this.spiralVase = false;
-    this.standbyTemperatureDelta = -5;
     this.startFilamentGcode = new Array(extruderCount).fill('');
-    this.startGcode = '';
-    this.supportMaterial = false;
-    this.supportMaterialAngle = 0;
-    this.supportMaterialAuto = true;
-    this.supportMaterialBottomContactDistance = -1; // -1 == use same setting as top interfaces
-    this.supportMaterialBottomInterfaceLayers = -1; // -1 == use same setting as top interfaces
-    this.supportMaterialBuildplateOnly = false;
-    this.supportMaterialClosingRadius = 2;
-    this.supportMaterialContactDistance = 0;
-    this.supportMaterialEnforceLayers = 0;
-    this.supportMaterialExtruder = 0; // 0 == use current extruder
-    this.supportMaterialExtrusionWidth = 0.35;
-    this.supportMaterialInterfaceContactLoops = false;
-    this.supportMaterialInterfaceExtruder = 0; // 0 == use current extruder
-    this.supportMaterialInterfaceLayers = 0;
-    this.supportMaterialInterfacePattern = SupportInterfacePatterns.RECTILINEAR;
-    this.supportMaterialInterfaceSpacing = 0.2;
-    this.supportMaterialInterfaceSpeed = 80;
-    this.supportMaterialPattern = SupportPatterns.RECTILINEAR;
-    this.supportMaterialSpacing = 2;
-    this.supportMaterialSpeed = 50;
-    this.supportMaterialStyle = SupportStyles.GRID;
-    this.supportMaterialSynchronizeLayers = false;
-    this.supportMaterialThreshold = 55;
-    this.supportMaterialWithSheath = false;
-    this.supportMaterialXYSpacing = '50%';
     this.temperature = new Array(extruderCount).fill(205);
-    this.templateCustomGcode = '';
-    this.thickBridges = false;
-    this.thinWalls = true;
-    this.threads = 20;
-    this.thumbnails = [];
-    this.toolchangeGcode = '';
-    this.topFillPattern = SolidFillPatterns.MONOTONIC;
-    this.topInfillExtrusionWidth = 0.4;
-    this.topSolidInfillSpeed = 40;
-    this.topSolidLayers = 5;
-    this.topSolidMinThickness = 0.7;
-    this.travelSpeed = 180;
-    this.travelSpeedZ = 180;
-    this.useFirmwareRetraction = false;
-    this.useRelativeEDistances = false;
-    this.useVolumetricE = false;
-    this.variableLayerHeight = false;
     this.wipe = new Array(extruderCount).fill(false);
-    this.wipeIntoInfill = false;
-    this.wipeIntoObjects = false;
-    this.wipeTower = false;
-    this.wipeTowerBridging = 10;
-    this.wipeTowerBrimWidth = 2;
-    this.wipeTowerNoSparseLayers = false;
-    this.wipeTowerRotationAngle = 0;
-    this.wipeTowerWidth = 60;
-    this.wipeTowerX = 180;
-    this.wipeTowerY = 140;
     this.wipingVolumesExtruders = new Array(extruderCount).fill(0).map(() => [70, 70]);
-    this.wipingVolumesMatrix = new Array(extruderCount).fill(0).map((_, i) => (
-      new Array(extruderCount).fill(0).map((__, j) => (i === j ? 0 : 140))
-    ));
-    this.xySizeCompensation = 0;
-    this.zOffset = 0;
-
-    // not used by PrusaSlicer
-    this.clearBufferCommand = 'G4 P0';
+    this.wipingVolumesMatrix = new Array(extruderCount)
+      .fill(0)
+      .map((_, i) => new Array(extruderCount).fill(0).map((__, j) => (i === j ? 0 : 140)));
     this.towerSpeed = new Array(extruderCount).fill(0);
-    this.towerExtrusionWidth = 0.45;
-    this.layerGcodePrinterscript = '';
-    this.endGcodePrinterscript = '';
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
-    this.startGcodePrinterscript = '';
-    this.preSideTransitionPrinterscript = '';
-    this.sideTransitionPrinterscript = '';
-    this.postSideTransitionPrinterscript = '';
   }
 
   getBedShapeString() {
@@ -310,10 +394,7 @@ class Profile {
         const x = Math.cos((2 * Math.PI * i) / 72);
         const y = Math.cos((2 * Math.PI * i) / 72);
         // scale to correct diameter and apply offsets
-        points.push([
-          roundTo((x * diameter) + xOff, 5),
-          roundTo((y * diameter) + yOff, 5),
-        ]);
+        points.push([roundTo(x * diameter + xOff, 5), roundTo(y * diameter + yOff, 5)]);
       }
     } else {
       const bottomLeftX = -this.originOffset[0];
@@ -328,9 +409,13 @@ class Profile {
 
   toString() {
     const now = new Date();
-    const dateString = `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`;
-    const timeString = `${now.getUTCHours()}:${now.getUTCMinutes()}:${now.getUTCSeconds()}`;
-    return `; generated by Canvas on ${dateString} at ${timeString} UTC
+    const Y = now.getUTCFullYear();
+    const M = now.getUTCMonth() + 1;
+    const D = now.getUTCDate();
+    const h = now.getUTCHours();
+    const m = now.getUTCMinutes();
+    const s = now.getUTCSeconds();
+    return `; generated by Canvas on ${Y}-${M}-${D} at ${h}:${m}:${s} UTC
 
 ; avoid_crossing_perimeters = ${boolToIntString(this.avoidCrossingPerimeters)}
 ; avoid_crossing_perimeters_max_detour = ${this.avoidCrossingPerimetersMaxDetour}
@@ -368,7 +453,7 @@ class Profile {
 ; draft_shield = ${this.draftShield}
 ; duplicate_distance = ${this.duplicateDistance}
 ; elefant_foot_compensation = ${this.elephantFootCompensation}
-; end_filament_gcode = ${this.endFilamentGcode.map(gcode => (gcode ? `"${gcode}"` : '";"')).join(';')}
+; end_filament_gcode = ${this.endFilamentGcode.map((gcode) => (gcode ? `"${gcode}"` : '";"')).join(';')}
 ; end_gcode = ${this.endGcode || ';'}
 ; ensure_vertical_shell_thickness = ${boolToIntString(this.ensureVerticalShellThickness)}
 ; external_perimeter_extrusion_width = ${this.externalPerimeterExtrusionWidth}
@@ -399,7 +484,7 @@ class Profile {
 ; filament_max_volumetric_speed = ${this.filamentMaxVolumetricSpeed.join(',')}
 ; filament_minimal_purge_on_wipe_tower = ${this.filamentMinimalPurgeOnWipeTower.join(',')}
 ; filament_notes = ${this.filamentNotes.join(';')}
-; filament_ramming_parameters = ${this.filamentRammingParameters.map(params => `"${params}"`).join(';')}
+; filament_ramming_parameters = ${this.filamentRammingParameters.map((params) => `"${params}"`).join(';')}
 ; filament_retract_before_travel = ${this.filamentRetractBeforeTravel.join(',')}
 ; filament_retract_before_wipe = ${this.filamentRetractBeforeWipe.join(',')}
 ; filament_retract_layer_change = ${this.filamentRetractLayerChange.join(',')}
@@ -409,7 +494,7 @@ class Profile {
 ; filament_retract_lift_below = ${this.filamentRetractLiftBelow.join(',')}
 ; filament_retract_restart_extra = ${this.filamentRetractRestartExtra.join(',')}
 ; filament_retract_speed = ${this.filamentRetractSpeed.join(',')}
-; filament_settings_id = ${this.filamentSettingsId.map(val => `"${val}"`).join(';')}
+; filament_settings_id = ${this.filamentSettingsId.map((val) => `"${val}"`).join(';')}
 ; filament_soluble = ${this.filamentSoluble.map(boolToIntString).join(',')}
 ; filament_spool_weight = ${this.filamentSpoolWeight.join(',')}
 ; filament_toolchange_delay = ${this.filamentToolchangeDelay.join(',')}
@@ -518,7 +603,7 @@ class Profile {
 ; remaining_times = ${boolToIntString(this.remainingTimes)}
 ; resolution = ${this.resolution}
 ; retract_before_travel = ${this.retractBeforeTravel.join(',')}
-; retract_before_wipe = ${this.retractBeforeWipe.map(val => `${val}%`).join(',')}
+; retract_before_wipe = ${this.retractBeforeWipe.map((val) => `${val}%`).join(',')}
 ; retract_layer_change = ${this.retractLayerChange.map(boolToIntString).join(',')}
 ; retract_length = ${this.retractLength.join(',')}
 ; retract_length_toolchange = ${this.retractLengthToolchange.join(',')}
@@ -546,7 +631,7 @@ class Profile {
 ; solid_infill_speed = ${this.solidInfillSpeed}
 ; spiral_vase = ${boolToIntString(this.spiralVase)}
 ; standby_temperature_delta = ${this.standbyTemperatureDelta}
-; start_filament_gcode = ${this.startFilamentGcode.map(gcode => (gcode ? `"${gcode}"` : '";"')).join(';')}
+; start_filament_gcode = ${this.startFilamentGcode.map((gcode) => (gcode ? `"${gcode}"` : '";"')).join(';')}
 ; start_gcode = ${this.startGcode || ';'}
 ; support_material = ${boolToIntString(this.supportMaterial)}
 ; support_material_angle = ${this.supportMaterialAngle}
@@ -602,12 +687,10 @@ class Profile {
 ; wipe_tower_width = ${this.wipeTowerWidth}
 ; wipe_tower_x = ${this.wipeTowerX}
 ; wipe_tower_y = ${this.wipeTowerY}
-; wiping_volumes_extruders = ${this.wipingVolumesExtruders.map(vals => vals.join(',')).join(',')}
-; wiping_volumes_matrix = ${this.wipingVolumesMatrix.map(vals => vals.join(',')).join(',')}
+; wiping_volumes_extruders = ${this.wipingVolumesExtruders.map((vals) => vals.join(',')).join(',')}
+; wiping_volumes_matrix = ${this.wipingVolumesMatrix.map((vals) => vals.join(',')).join(',')}
 ; xy_size_compensation = ${this.xySizeCompensation}
 ; z_offset = ${this.zOffset}
 `;
   }
 }
-
-module.exports = Profile;

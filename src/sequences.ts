@@ -1,30 +1,29 @@
 // - convert \ to \\
 // - convert {{ to \{{
 // - convert " to \"
-const convertEscapes = (line) => line
-  .replace(/\\/g, '\\\\')
-  .replace(/{{/g, '\\{{')
-  .replace(/"/g, '\\"');
+const convertEscapes = (line: string): string =>
+  line.replace(/\\/g, '\\\\').replace(/{{/g, '\\{{').replace(/"/g, '\\"');
 
 // convert <VAR> variables to {{var}} variables
-const convertVariables = (line, isStartSequence = false) => line
-  .replace(/<X>/g, '{{currentX}}')
-  .replace(/<Y>/g, '{{currentY}}')
-  .replace(/<Z>/g, '{{currentZ}}')
-  .replace(/<NEXTX>/g, '{{nextX}}')
-  .replace(/<NEXTY>/g, '{{nextY}}')
-  .replace(/<E>/g, '0')
-  .replace(/<DESTRING>/g, '{{retractDistance}}')
-  .replace(/<TEMP>/g, isStartSequence ? '{{firstLayerPrintTemperature}}' : '{{currentPrintTemperature}}')
-  .replace(/<BED>/g, isStartSequence ? '{{bedTemperature}}' : '{{currentBedTemperature}}')
-  .replace(/<LAYER>/g, '{{layer}}')
-  .replace(/<TELAPSED>/g, '{{timeElapsed}}')
-  .replace(/<TREMAIN>/g, '{{totalTime - timeElapsed}}')
-  .replace(/<TTOTAL>/g, '{{totalTime}}');
+const convertVariables = (line: string, isStartSequence = false): string =>
+  line
+    .replace(/<X>/g, '{{currentX}}')
+    .replace(/<Y>/g, '{{currentY}}')
+    .replace(/<Z>/g, '{{currentZ}}')
+    .replace(/<NEXTX>/g, '{{nextX}}')
+    .replace(/<NEXTY>/g, '{{nextY}}')
+    .replace(/<E>/g, '0')
+    .replace(/<DESTRING>/g, '{{retractDistance}}')
+    .replace(/<TEMP>/g, isStartSequence ? '{{firstLayerPrintTemperature}}' : '{{currentPrintTemperature}}')
+    .replace(/<BED>/g, isStartSequence ? '{{bedTemperature}}' : '{{currentBedTemperature}}')
+    .replace(/<LAYER>/g, '{{layer}}')
+    .replace(/<TELAPSED>/g, '{{timeElapsed}}')
+    .replace(/<TREMAIN>/g, '{{totalTime - timeElapsed}}')
+    .replace(/<TTOTAL>/g, '{{totalTime}}');
 
 const directive = `@printerscript 1.0\n`;
 
-const convertToPrinterScript = (sequence, isStartSequence = false) => {
+export const convertToPrinterScript = (sequence: string, isStartSequence = false): string => {
   const trimmed = sequence.trim();
   if (trimmed.length === 0) {
     return directive;
@@ -41,13 +40,17 @@ const convertToPrinterScript = (sequence, isStartSequence = false) => {
   return `${directive}${converted}`;
 };
 
-const applyStartSequenceDefaults = (sequence, machine, primaryExtruder, bedTemp) => {
-  const hasPrintTemp = sequence.includes('{{printTemperature}}')
-    || sequence.includes('{{firstLayerPrintTemperature}}');
+export const applyStartSequenceDefaults = (
+  sequence: string,
+  primaryExtruder: number,
+  bedTemp: number
+): string => {
+  const hasPrintTemp =
+    sequence.includes('{{printTemperature}}') || sequence.includes('{{firstLayerPrintTemperature}}');
   const hasBedTemp = sequence.includes('{{bedTemperature}}');
   const bedTempUsed = bedTemp > 0;
   const addPrintTemp = !hasPrintTemp;
-  const addBedTemp = (!hasBedTemp && bedTempUsed);
+  const addBedTemp = !hasBedTemp && bedTempUsed;
 
   const printTempCommand = `"M104 S{{firstLayerPrintTemperature}} T${primaryExtruder}"`;
   const bedTempCommand = '"M140 S{{bedTemperature}}"';
@@ -72,9 +75,4 @@ const applyStartSequenceDefaults = (sequence, machine, primaryExtruder, bedTemp)
   startSequenceParts.push('";START_OF_PRINT"');
   startSequenceParts.unshift(directive); // restore "@printerscript 1.0" as first line
   return startSequenceParts.join('\n');
-};
-
-module.exports = {
-  convertToPrinterScript,
-  applyStartSequenceDefaults,
 };
