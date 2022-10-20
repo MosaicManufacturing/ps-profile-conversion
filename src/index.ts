@@ -149,6 +149,7 @@ const index = ({
   // extrusion widths
   profile.extrusionWidth = style.extrusionWidth;
   profile.solidInfillExtrusionWidth = style.extrusionWidth;
+  profile.topInfillExtrusionWidth = style.extrusionWidth;
   if (style.perimeterExtrusionWidth) {
     profile.perimeterExtrusionWidth = variantValue(
       style.perimeterExtrusionWidth,
