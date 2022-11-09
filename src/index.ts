@@ -185,7 +185,7 @@ const index = ({
       solidLayers = Math.round(solidLayersMM / style.layerHeight);
     } else {
       solidLayers = style.skinThickness.value;
-      solidLayersMM = solidLayers * style.layerHeight;
+      solidLayersMM = roundTo(solidLayers * style.layerHeight, 4);
     }
     profile.bottomSolidLayers = solidLayers;
     profile.bottomSolidMinThickness = solidLayersMM;
@@ -197,7 +197,7 @@ const index = ({
         topSolidLayers = Math.round(topSolidLayersMM / style.layerHeight);
       } else if (style.topSkinThickness.units === 'layers') {
         topSolidLayers = style.topSkinThickness.value;
-        topSolidLayersMM = topSolidLayers * style.layerHeight;
+        topSolidLayersMM = roundTo(topSolidLayers * style.layerHeight, 4);
       }
       profile.topSolidLayers = topSolidLayers;
       profile.topSolidMinThickness = topSolidLayersMM;
