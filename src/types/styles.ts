@@ -91,6 +91,7 @@ export interface StyleSettings {
   printTemperature: number;
   firstLayerPrintTemperature: NumericStyleVariant<'C'> | AutoStyleVariant;
   bedTemperature: number;
+  chamberTemperature?: number;
   useFan: boolean;
   enableFanAtLayer: number;
   fanSpeed: number;

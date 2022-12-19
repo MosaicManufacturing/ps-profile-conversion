@@ -388,6 +388,36 @@ const index = ({
       bedTemperature = Math.max(bedTemperature, bedTemperatureMaterial);
     }
   }
+
+  // chamber temperature logic:
+  // - ignore inputs we know we won't be using
+  // - only look at project's chamber temp setting if no inputs have a material override
+  // - use the lowest chamber temperature seen (including 0)
+  let useChamberTemperatureFromStyle = true;
+  for (let i = 0; i < extruderCount; i++) {
+    if (drivesUsed[i]) {
+      const material = materials[i] as Material;
+      if (material.style.useChamberTemperature) {
+        useChamberTemperatureFromStyle = false;
+        break;
+      }
+    }
+  }
+  let chamberTemperature = Infinity;
+  if (useChamberTemperatureFromStyle) {
+    chamberTemperature = style.chamberTemperature ?? 0;
+  } else {
+    for (let i = 0; i < extruderCount; i++) {
+      if (drivesUsed[i]) {
+        const material = materials[i] as Material;
+        if (material.style.useChamberTemperature && material.style.chamberTemperature !== undefined) {
+          chamberTemperature = Math.min(chamberTemperature, material.style.chamberTemperature);
+        }
+      }
+    }
+  }
+  profile.chamberTemperature = chamberTemperature;
+
   for (let i = 0; i < extruderCount; i++) {
     const material = materials[i] as Material;
     profile.bedTemperature[i] = bedTemperature;
@@ -630,7 +660,8 @@ const index = ({
   profile.startGcodePrinterscript = applyStartSequenceDefaults(
     profile.startGcodePrinterscript,
     palette ? palette.extruder : 0,
-    bedTemperature
+    bedTemperature,
+    chamberTemperature
   );
 
   // end sequence

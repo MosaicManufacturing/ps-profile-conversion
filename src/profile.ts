@@ -296,6 +296,7 @@ export default class Profile {
   clearBufferCommand = 'G4 P0';
   towerSpeed: number[];
   towerExtrusionWidth = 0.45;
+  chamberTemperature = 0;
   layerGcodePrinterscript = '';
   endGcodePrinterscript = '';
   startFilamentGcodePrinterscript: string[];
