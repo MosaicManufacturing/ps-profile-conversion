@@ -21,6 +21,8 @@ export default class Profile {
   avoidCrossingPerimeters = false;
   avoidCrossingPerimetersMaxDetour: number | string = 0;
   bedCircular = false;
+  bedCustomModel = '';
+  bedCustomTexture = '';
   bedSize: [number, number, number] = [250, 250, 210];
   originOffset: [number, number, number] = [0, 0, 0];
   bedTemperature: number[];
@@ -431,8 +433,8 @@ export default class Profile {
 
 ; avoid_crossing_perimeters = ${boolToIntString(this.avoidCrossingPerimeters)}
 ; avoid_crossing_perimeters_max_detour = ${this.avoidCrossingPerimetersMaxDetour}
-; bed_custom_model =
-; bed_custom_texture =
+; bed_custom_model = ${this.bedCustomModel}
+; bed_custom_texture = ${this.bedCustomTexture}
 ; bed_shape = ${this.getBedShapeString()}
 ; bed_temperature = ${this.bedTemperature.join(',')}
 ; before_layer_gcode = ${this.beforeLayerGcode || ';'}
@@ -494,7 +496,7 @@ export default class Profile {
 ; filament_loading_speed_start = ${this.filamentLoadingSpeedStart.join(',')}
 ; filament_max_volumetric_speed = ${this.filamentMaxVolumetricSpeed.join(',')}
 ; filament_minimal_purge_on_wipe_tower = ${this.filamentMinimalPurgeOnWipeTower.join(',')}
-; filament_notes = ${this.filamentNotes.join(';')}
+; filament_notes = ${this.filamentNotes.map((notes) => `"${notes}"`).join(';')}
 ; filament_ramming_parameters = ${this.filamentRammingParameters.map((params) => `"${params}"`).join(';')}
 ; filament_retract_before_travel = ${this.filamentRetractBeforeTravel.join(',')}
 ; filament_retract_before_wipe = ${this.filamentRetractBeforeWipe.join(',')}
