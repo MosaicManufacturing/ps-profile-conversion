@@ -262,7 +262,7 @@ const index = ({
   // skirt/brim
   if (style.useBrim) {
     profile.brimType = BrimType.OUTER_ONLY;
-    profile.brimWidth = style.brimLoops * profile.firstLayerExtrusionWidth;
+    profile.brimWidth = roundTo(style.brimLoops * profile.firstLayerExtrusionWidth, 4);
     profile.brimSeparation = style.brimGap;
   }
 
