@@ -6,6 +6,7 @@ import {
   InfillPattern,
   IroningType,
   MachineLimitsUsage,
+  PerimeterGenerator,
   SeamPosition,
   SolidFillPattern,
   SupportInterfacePattern,
@@ -39,7 +40,6 @@ export default class Profile {
   clipMultipartObjects = true;
   colorChangeGcode = 'M600';
   colorPrintHeights = [];
-  compatiblePrintersConditionCumulative = '';
   completeObjects = false;
   cooling: boolean[];
   coolingTubeLength = 0;
@@ -125,6 +125,7 @@ export default class Profile {
   gcodeFlavor = GCodeFlavor.REPRAP_SPRINTER;
   gcodeLabelObjects = true; // currently required for Palette postprocessing
   gcodeResolution = 0.0125;
+  gcodeSubstitutions = '';
   highCurrentOnFilamentSwap = false;
   hostType = 'octoprint';
   infillAcceleration = 1000;
@@ -166,8 +167,12 @@ export default class Profile {
   maxFanSpeed: number[];
   maxLayerHeight: number[];
   maxPrintSpeed = 200;
+  maxVolumetricExtrusionRateSlopeNegative = 0;
+  maxVolumetricExtrusionRateSlopePositive = 0;
   maxVolumetricSpeed = 0;
+  minBeadWidth = 85; // 0-100
   minFanSpeed: number[];
+  minFeatureSize = 25; // 0-100
   minLayerHeight: number[];
   minPrintSpeed: number[];
   minSkirtLength = 4;
@@ -184,6 +189,7 @@ export default class Profile {
   perimeterAcceleration = 800;
   perimeterExtruder = 1;
   perimeterExtrusionWidth = 0.45;
+  perimeterGenerator = PerimeterGenerator.ARACHNE;
   perimeterSpeed = 45;
   perimeters = 2;
   physicalPrinterSettingsId = '';
@@ -264,6 +270,7 @@ export default class Profile {
   thinWalls = true;
   threads = 20;
   thumbnails: [number, number][] = [];
+  thumbnailsFormat = 'PNG';
   toolchangeGcode = '';
   topFillPattern = SolidFillPattern.MONOTONIC;
   topInfillExtrusionWidth = 0.4;
@@ -276,6 +283,10 @@ export default class Profile {
   useRelativeEDistances = false;
   useVolumetricE = false;
   variableLayerHeight = false;
+  wallDistributionCount = 1;
+  wallTransitionAngle = 10;
+  wallTransitionFilterDeviation = 25; // 0-100
+  wallTransitionLength = 100; // 0-100
   wipe: boolean[];
   wipeIntoInfill = false;
   wipeIntoObjects = false;
@@ -440,7 +451,6 @@ export default class Profile {
 ; clip_multipart_objects = ${boolToIntString(this.clipMultipartObjects)}
 ; color_change_gcode = ${this.colorChangeGcode || ';'}
 ; colorprint_heights = ${this.colorPrintHeights.join(',')}
-; compatible_printers_condition_cummulative = ${this.compatiblePrintersConditionCumulative}
 ; complete_objects = ${boolToIntString(this.completeObjects)}
 ; cooling = ${this.cooling.map(boolToIntString).join(',')}
 ; cooling_tube_length = ${this.coolingTubeLength}
@@ -524,8 +534,9 @@ export default class Profile {
 ; gap_fill_speed = ${this.gapFillSpeed}
 ; gcode_comments = ${boolToIntString(this.gcodeComments)}
 ; gcode_flavor = ${this.gcodeFlavor}
-; gcode_resolution = ${this.gcodeResolution}
 ; gcode_label_objects = ${boolToIntString(this.gcodeLabelObjects)}
+; gcode_resolution = ${this.gcodeResolution}
+; gcode_substitutions = ${this.gcodeSubstitutions}
 ; high_current_on_filament_swap = ${boolToIntString(this.highCurrentOnFilamentSwap)}
 ; host_type = ${this.hostType}
 ; infill_acceleration = ${this.infillAcceleration}
@@ -568,8 +579,12 @@ export default class Profile {
 ; max_layer_height = ${this.maxLayerHeight.join(',')}
 ; max_print_height = ${this.bedSize[2]}
 ; max_print_speed = ${this.maxPrintSpeed}
+; max_volumetric_extrusion_rate_slope_negative = ${this.maxVolumetricExtrusionRateSlopeNegative}
+; max_volumetric_extrusion_rate_slope_positive = ${this.maxVolumetricExtrusionRateSlopePositive}
 ; max_volumetric_speed = ${this.maxVolumetricSpeed}
+; min_bead_width = ${this.minBeadWidth}%
 ; min_fan_speed = ${this.minFanSpeed.join(',')}
+; min_feature_size = ${this.minFeatureSize}%
 ; min_layer_height = ${this.minLayerHeight.join(',')}
 ; min_print_speed = ${this.minPrintSpeed.join(',')}
 ; min_skirt_length = ${this.minSkirtLength}
@@ -585,6 +600,7 @@ export default class Profile {
 ; perimeter_acceleration = ${this.perimeterAcceleration}
 ; perimeter_extruder = ${this.perimeterExtruder}
 ; perimeter_extrusion_width = ${this.perimeterExtrusionWidth}
+; perimeter_generator = ${this.perimeterGenerator}
 ; perimeter_speed = ${this.perimeterSpeed}
 ; perimeters = ${this.perimeters}
 ; physical_printer_settings_id = ${this.physicalPrinterSettingsId}
@@ -665,6 +681,7 @@ export default class Profile {
 ; thin_walls = ${boolToIntString(this.thinWalls)}
 ; threads = ${this.threads}
 ; thumbnails = ${this.thumbnails.map(([x, y]) => `${x}x${y}`).join(',')}
+; thumbnails_format = ${this.thumbnailsFormat}
 ; toolchange_gcode = ${this.toolchangeGcode || ';'}
 ; top_fill_pattern = ${this.topFillPattern}
 ; top_infill_extrusion_width = ${this.topInfillExtrusionWidth}
@@ -677,6 +694,10 @@ export default class Profile {
 ; use_relative_e_distances = ${boolToIntString(this.useRelativeEDistances)}
 ; use_volumetric_e = ${boolToIntString(this.useVolumetricE)}
 ; variable_layer_height = ${boolToIntString(this.variableLayerHeight)}
+; wall_distribution_count = ${this.wallDistributionCount}
+; wall_transition_angle = ${this.wallTransitionAngle}
+; wall_transition_filter_deviation = ${this.wallTransitionFilterDeviation}%
+; wall_transition_length = ${this.wallTransitionLength}%
 ; wipe = ${this.wipe.map(boolToIntString).join(',')}
 ; wipe_into_infill = ${boolToIntString(this.wipeIntoInfill)}
 ; wipe_into_objects = ${boolToIntString(this.wipeIntoObjects)}

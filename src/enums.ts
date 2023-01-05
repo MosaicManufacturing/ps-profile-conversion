@@ -92,3 +92,8 @@ export enum SupportInterfacePattern {
   RECTILINEAR = 'rectilinear',
   CONCENTRIC = 'concentric',
 }
+
+export enum PerimeterGenerator {
+  CLASSIC = 'classic',
+  ARACHNE = 'arachne',
+}
