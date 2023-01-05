@@ -17,6 +17,8 @@ import { boolToIntString, roundTo } from './utils';
 
 type Nil = 'nil';
 
+const SETTINGS_ID = 'out.3mf';
+
 export default class Profile {
   avoidCrossingPerimeters = false;
   avoidCrossingPerimetersMaxDetour: number | string = 0;
@@ -196,10 +198,10 @@ export default class Profile {
   perimeters = 2;
   physicalPrinterSettingsId = '';
   postProcess = '';
-  printSettingsId = '';
+  printSettingsId = SETTINGS_ID;
   printerModel = '';
   printerNotes = '';
-  printerSettingsId = '';
+  printerSettingsId = SETTINGS_ID;
   printerTechnology = 'FFF';
   printerVariant = '';
   printerVendor = '';
@@ -355,7 +357,7 @@ export default class Profile {
     this.filamentRetractLiftBelow = new Array(extruderCount).fill('nil');
     this.filamentRetractRestartExtra = new Array(extruderCount).fill('nil');
     this.filamentRetractSpeed = new Array(extruderCount).fill('nil');
-    this.filamentSettingsId = new Array(extruderCount).fill('Filament');
+    this.filamentSettingsId = new Array(extruderCount).fill(`${SETTINGS_ID} (Filament)`);
     this.filamentSoluble = new Array(extruderCount).fill(false);
     this.filamentSpoolWeight = new Array(extruderCount).fill(0);
     this.filamentToolchangeDelay = new Array(extruderCount).fill(0);
