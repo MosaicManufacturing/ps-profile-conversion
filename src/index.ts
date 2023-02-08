@@ -261,9 +261,15 @@ const index = ({
 
   // skirt/brim
   if (style.useBrim) {
-    profile.brimType = BrimType.OUTER_ONLY;
-    profile.brimWidth = roundTo(style.brimLoops * profile.firstLayerExtrusionWidth, 4);
-    profile.brimSeparation = style.brimGap;
+    if (style.brimLayers > 1) {
+      profile.skirts = style.brimLoops;
+      profile.skirtDistance = style.brimGap;
+      profile.skirtHeight = style.brimLayers;
+    } else {
+      profile.brimType = BrimType.OUTER_ONLY;
+      profile.brimWidth = roundTo(style.brimLoops * profile.firstLayerExtrusionWidth, 4);
+      profile.brimSeparation = style.brimGap;
+    }
   }
 
   // infill
