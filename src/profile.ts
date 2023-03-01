@@ -150,7 +150,7 @@ export default class Profile {
   ironingType = IroningType.ALL_TOP_SURFACES;
   layerGcode = '';
   layerHeight = 0.2;
-  machineLimitsUsage = MachineLimitsUsage.EMIT_TO_GCODE;
+  machineLimitsUsage = MachineLimitsUsage.USE_FOR_TIME_ESTIMATE;
   machineMaxAccelerationE = [5000, 5000]; // [normal, stealth]
   machineMaxAccelerationExtruding = [1250, 1250]; // [normal, stealth]
   machineMaxAccelerationRetracting = [1250, 1250]; // [normal, stealth]
