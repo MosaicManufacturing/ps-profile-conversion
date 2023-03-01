@@ -33,7 +33,7 @@ export default class Profile {
   bottomFillPattern = SolidFillPattern.MONOTONIC;
   bottomSolidLayers = 4;
   bottomSolidMinThickness = 0.5;
-  bridgeAcceleration = 1000;
+  bridgeAcceleration = 0;
   bridgeAngle = 0;
   bridgeFanSpeed: number[];
   bridgeFlowRatio = 0.95;
@@ -48,7 +48,7 @@ export default class Profile {
   cooling: boolean[];
   coolingTubeLength = 0;
   coolingTubeRetraction = 0;
-  defaultAcceleration = 1000;
+  defaultAcceleration = 0;
   defaultFilamentProfile = '';
   defaultPrintProfile = '';
   deretractSpeed: number[];
@@ -111,7 +111,7 @@ export default class Profile {
   fillAngle = 45;
   fillDensity = 15;
   fillPattern = InfillPattern.RECTILINEAR;
-  firstLayerAcceleration = 1000;
+  firstLayerAcceleration = 0;
   firstLayerAccelerationOverRaft = 0;
   firstLayerBedTemperature: number[];
   firstLayerExtrusionWidth = 0.42;
@@ -132,7 +132,7 @@ export default class Profile {
   gcodeSubstitutions = '';
   highCurrentOnFilamentSwap = false;
   hostType = 'octoprint';
-  infillAcceleration = 1000;
+  infillAcceleration = 0;
   infillAnchor = 2.5;
   infillAnchorMax = 12;
   infillEveryLayers = 1;
@@ -150,7 +150,7 @@ export default class Profile {
   ironingType = IroningType.ALL_TOP_SURFACES;
   layerGcode = '';
   layerHeight = 0.2;
-  machineLimitsUsage = MachineLimitsUsage.EMIT_TO_GCODE;
+  machineLimitsUsage = MachineLimitsUsage.USE_FOR_TIME_ESTIMATE;
   machineMaxAccelerationE = [5000, 5000]; // [normal, stealth]
   machineMaxAccelerationExtruding = [1250, 1250]; // [normal, stealth]
   machineMaxAccelerationRetracting = [1250, 1250]; // [normal, stealth]
@@ -190,7 +190,7 @@ export default class Profile {
   overhangs = true; // 'Detect Bridging Perimeters'
   parkingPosRetraction = 0;
   pausePrintGcode = 'M601';
-  perimeterAcceleration = 800;
+  perimeterAcceleration = 0;
   perimeterExtruder = 1;
   perimeterExtrusionWidth = 0.45;
   perimeterGenerator = PerimeterGenerator.ARACHNE;
