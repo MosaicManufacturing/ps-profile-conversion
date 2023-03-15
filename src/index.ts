@@ -65,6 +65,7 @@ const filamentLengthToVolume = (length: number, diameter = 1.75): number =>
   roundTo((diameter / 2) ** 2 * Math.PI * length, 2);
 
 interface Inputs {
+  usableInputCount: number | null;
   machine: MachineSettings;
   style: StyleSettings;
   materials: Material[];
@@ -77,6 +78,7 @@ interface Inputs {
 }
 
 const index = ({
+  usableInputCount,
   machine,
   style,
   materials,
@@ -88,7 +90,9 @@ const index = ({
   machineLimits,
 }: Inputs) => {
   // TODO: support dual-extruders here in the future?
-  const extruderCount = palette ? palette.getInputCount() : 1;
+  const maxExtruderCount = palette ? palette.getInputCount() : 1;
+  const extruderCount =
+    usableInputCount !== null ? Math.min(maxExtruderCount, usableInputCount) : maxExtruderCount;
 
   validateArrayLengths(extruderCount, materials, colors, drivesUsed, variableTransitionLengths);
 
