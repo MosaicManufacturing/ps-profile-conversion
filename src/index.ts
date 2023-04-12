@@ -486,7 +486,16 @@ const index = ({
       const fanSpeedMaterial = getMaterialFieldValue(material, 'fanSpeed', style.fanSpeed);
       profile.minFanSpeed[i] = fanSpeedMaterial;
       profile.maxFanSpeed[i] = fanSpeedMaterial;
-      profile.bridgeFanSpeed[i] = fanSpeedMaterial;
+      const bridgeFanSpeedMaterial = getMaterialFieldValue(
+        material,
+        'bridgingFanSpeed',
+        style.bridgingFanSpeed ?? { value: 'auto' }
+      );
+      if (!bridgeFanSpeedMaterial || bridgeFanSpeedMaterial.value === 'auto') {
+        profile.bridgeFanSpeed[i] = fanSpeedMaterial;
+      } else {
+        profile.bridgeFanSpeed[i] = bridgeFanSpeedMaterial.value;
+      }
       const fanLayerMaterial = getMaterialFieldValue(material, 'enableFanAtLayer', style.enableFanAtLayer);
       if (fanLayerMaterial <= 0) {
         profile.disableFanFirstLayers[i] = 0;

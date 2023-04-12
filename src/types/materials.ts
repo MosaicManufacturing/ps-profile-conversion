@@ -14,6 +14,7 @@ export interface MaterialStyleValues {
   enableFanAtLayer: number;
   fanSpeed: number;
   perimeterFanSpeed: NumericStyleVariant<'%'> | AutoStyleVariant;
+  bridgingFanSpeed: NumericStyleVariant<'%'> | AutoStyleVariant;
   towerSpeed: number;
   maxBridgingSpeed: number;
 }

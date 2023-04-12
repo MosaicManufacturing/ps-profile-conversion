@@ -96,6 +96,7 @@ export interface StyleSettings {
   enableFanAtLayer: number;
   fanSpeed: number;
   perimeterFanSpeed: NumericStyleVariant<'%'> | AutoStyleVariant;
+  bridgingFanSpeed?: NumericStyleVariant<'%'> | AutoStyleVariant;
   minLayerTime: number;
   firstLayerSpeed: NumericStyleVariant<'mm/s'> | NumericStyleVariant<'%'>;
   maxBridgingSpeed?: NumericStyleVariant<'mm/s'> | NumericStyleVariant<'%'> | AutoStyleVariant;
