@@ -250,8 +250,6 @@ const index = ({
   profile.externalPerimetersFirst = style.perimeterOrder === 0;
   if (style.seamOnCorners) {
     profile.seamPosition = SeamPosition.NEAREST;
-  } else if (style.seamJitter) {
-    profile.seamPosition = SeamPosition.RANDOM;
   } else if (style.seamAngle >= 45 && style.seamAngle <= 135) {
     profile.seamPosition = SeamPosition.REAR;
   }
