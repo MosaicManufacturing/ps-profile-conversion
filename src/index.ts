@@ -132,7 +132,7 @@ const index = ({
     profile.useRelativeEDistances = false;
   } else if (machine.firmwareType === Firmware.FIRMWARE_FLASHFORGE) {
     // FlashForge
-    profile.useRelativeEDistances = true;
+    profile.useRelativeEDistances = false;
   } else if (machine.firmwareType === Firmware.FIRMWARE_GRIFFIN) {
     // Ultimaker Griffin
     profile.useRelativeEDistances = false;
