@@ -5,6 +5,7 @@ import type { MachineLimits } from './types/machine-limits';
 import type { Material } from './types/materials';
 import type { PaletteData } from './types/palette';
 import type { MachineSettings } from './types/printers';
+import { Firmware } from './types/printers';
 import type { StyleSettings } from './types/styles';
 import type { DriveColorStrength, TransitionTower, VariableTransitions } from './types/transitions';
 import {
@@ -122,16 +123,16 @@ const index = ({
   profile.gcodeComments = true;
 
   // firmware
-  if (machine.firmwareType === 1) {
+  if (machine.firmwareType === Firmware.FIRMWARE_5D_REL) {
     // RepRap 5D Relative
     profile.useRelativeEDistances = true;
-  } else if (machine.firmwareType === 2) {
+  } else if (machine.firmwareType === Firmware.FIRMWARE_5D_ABS) {
     // RepRap 5D Absolute
     profile.useRelativeEDistances = false;
-  } else if (machine.firmwareType === 10) {
+  } else if (machine.firmwareType === Firmware.FIRMWARE_FLASHFORGE) {
     // FlashForge
     profile.useRelativeEDistances = true;
-  } else if (machine.firmwareType === 11) {
+  } else if (machine.firmwareType === Firmware.FIRMWARE_GRIFFIN) {
     // Ultimaker Griffin
     profile.useRelativeEDistances = false;
   }
