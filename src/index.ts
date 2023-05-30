@@ -1,10 +1,12 @@
 import { BrimType, GCodeFlavor, InfillPattern, SeamPosition, SolidFillPattern } from './enums';
+import { applyMachineLimits } from './machine-limits';
 import Profile from './profile';
 import { applyStartSequenceDefaults, convertToPrinterScript } from './sequences';
 import type { MachineLimits } from './types/machine-limits';
 import type { Material } from './types/materials';
 import type { PaletteData } from './types/palette';
 import type { MachineSettings } from './types/printers';
+import { Firmware } from './types/printers';
 import type { StyleSettings } from './types/styles';
 import type { DriveColorStrength, TransitionTower, VariableTransitions } from './types/transitions';
 import {
@@ -122,16 +124,16 @@ const index = ({
   profile.gcodeComments = true;
 
   // firmware
-  if (machine.firmwareType === 1) {
+  if (machine.firmwareType === Firmware.FIRMWARE_5D_REL) {
     // RepRap 5D Relative
     profile.useRelativeEDistances = true;
-  } else if (machine.firmwareType === 2) {
+  } else if (machine.firmwareType === Firmware.FIRMWARE_5D_ABS) {
     // RepRap 5D Absolute
     profile.useRelativeEDistances = false;
-  } else if (machine.firmwareType === 10) {
+  } else if (machine.firmwareType === Firmware.FIRMWARE_FLASHFORGE) {
     // FlashForge
-    profile.useRelativeEDistances = true;
-  } else if (machine.firmwareType === 11) {
+    profile.useRelativeEDistances = false;
+  } else if (machine.firmwareType === Firmware.FIRMWARE_GRIFFIN) {
     // Ultimaker Griffin
     profile.useRelativeEDistances = false;
   }
@@ -737,60 +739,7 @@ const index = ({
 
   // machine limits (if provided)
   if (machineLimits) {
-    if (machineLimits.maxFeedrate) {
-      if (machineLimits.maxFeedrate.x !== undefined) {
-        profile.machineMaxFeedrateX = [machineLimits.maxFeedrate.x, machineLimits.maxFeedrate.x];
-      }
-      if (machineLimits.maxFeedrate.y !== undefined) {
-        profile.machineMaxFeedrateY = [machineLimits.maxFeedrate.y, machineLimits.maxFeedrate.y];
-      }
-      if (machineLimits.maxFeedrate.z !== undefined) {
-        profile.machineMaxFeedrateZ = [machineLimits.maxFeedrate.z, machineLimits.maxFeedrate.z];
-      }
-      if (machineLimits.maxFeedrate.e !== undefined) {
-        profile.machineMaxFeedrateE = [machineLimits.maxFeedrate.e, machineLimits.maxFeedrate.e];
-      }
-    }
-    if (machineLimits.maxAcceleration) {
-      if (machineLimits.maxAcceleration.x !== undefined) {
-        profile.machineMaxAccelerationX = [machineLimits.maxAcceleration.x, machineLimits.maxAcceleration.x];
-      }
-      if (machineLimits.maxAcceleration.y !== undefined) {
-        profile.machineMaxAccelerationY = [machineLimits.maxAcceleration.y, machineLimits.maxAcceleration.y];
-      }
-      if (machineLimits.maxAcceleration.z !== undefined) {
-        profile.machineMaxAccelerationZ = [machineLimits.maxAcceleration.z, machineLimits.maxAcceleration.z];
-      }
-      if (machineLimits.maxAcceleration.e !== undefined) {
-        profile.machineMaxAccelerationE = [machineLimits.maxAcceleration.e, machineLimits.maxAcceleration.e];
-      }
-      if (machineLimits.maxAcceleration.extruding !== undefined) {
-        profile.machineMaxAccelerationExtruding = [
-          machineLimits.maxAcceleration.extruding,
-          machineLimits.maxAcceleration.extruding,
-        ];
-      }
-      if (machineLimits.maxAcceleration.retracting !== undefined) {
-        profile.machineMaxAccelerationRetracting = [
-          machineLimits.maxAcceleration.retracting,
-          machineLimits.maxAcceleration.retracting,
-        ];
-      }
-    }
-    if (machineLimits.maxJerk) {
-      if (machineLimits.maxJerk.x !== undefined) {
-        profile.machineMaxJerkX = [machineLimits.maxJerk.x, machineLimits.maxJerk.x];
-      }
-      if (machineLimits.maxJerk.y !== undefined) {
-        profile.machineMaxJerkY = [machineLimits.maxJerk.y, machineLimits.maxJerk.y];
-      }
-      if (machineLimits.maxJerk.z !== undefined) {
-        profile.machineMaxJerkZ = [machineLimits.maxJerk.z, machineLimits.maxJerk.z];
-      }
-      if (machineLimits.maxJerk.e !== undefined) {
-        profile.machineMaxJerkE = [machineLimits.maxJerk.e, machineLimits.maxJerk.e];
-      }
-    }
+    applyMachineLimits(profile, machineLimits);
   }
 
   return profile;
