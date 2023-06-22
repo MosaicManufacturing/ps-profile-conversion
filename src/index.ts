@@ -644,6 +644,7 @@ const index = ({
   // (must happen after everything but G-code sequences)
   switch (machine.extension) {
     case 'mcfx':
+    case 'daf':
       profile.useFirmwareRetraction = false;
       profile.gcodeComments = false;
       break;
