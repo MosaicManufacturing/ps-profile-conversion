@@ -646,7 +646,6 @@ const index = ({
     case 'mcfx':
     case 'daf':
       profile.useFirmwareRetraction = false;
-      profile.gcodeComments = false;
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
