@@ -344,11 +344,19 @@ const index = ({
   } else {
     profile.supportMaterialThreshold = Math.max(0, Math.min(90, 90 - style.maxOverhangAngle));
   }
+  // some notes about subtracting 1e-5 from supportMaterialContactDistance:
+  // - PS has an issue that appears to be caused by rounding errors/imprecision if
+  //   supportMaterialContactDistance is equal to (or is a multiple/factor of) layer height
+  // - sometimes, FlowErrorNegativeFlow is thrown (Flow::mm3_per_mm() produced negative flow.
+  //   Did you set some extrusion width too small?)
+  // - ensuring neither value is a multiple of the other appears to avoid the issue
+  // - 1e-5 is more decimal places than are allowed in Canvas, and small enough to not
+  //   significantly affect flow calculations, but large enough to avoid this issue
   if (style.supportZGap.units === 'layers') {
-    profile.supportMaterialContactDistance = style.supportZGap.value * style.layerHeight;
+    profile.supportMaterialContactDistance = style.supportZGap.value * style.layerHeight - 1e-5;
   } else {
     // units === 'mm'
-    profile.supportMaterialContactDistance = style.supportZGap.value;
+    profile.supportMaterialContactDistance = style.supportZGap.value - 1e-5;
   }
   profile.supportMaterialXYSpacing = style.supportXYGap;
   if (style.defaultSupportExtruder.value === 'auto') {
