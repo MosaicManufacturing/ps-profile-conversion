@@ -617,8 +617,8 @@ const index = ({
       }
     } else {
       const { driveColorStrengths, minTransitionLength, maxTransitionLength } = variableTransitionLengths;
-      for (let ingoing = 0; ingoing < driveColorStrengths.length; ingoing++) {
-        for (let outgoing = 0; outgoing < driveColorStrengths.length; outgoing++) {
+      for (let ingoing = 0; ingoing < extruderCount; ingoing++) {
+        for (let outgoing = 0; outgoing < extruderCount; outgoing++) {
           if (ingoing !== outgoing) {
             const ingoingStrength = driveColorStrengths[ingoing] as DriveColorStrength;
             const outgoingStrength = driveColorStrengths[outgoing] as DriveColorStrength;
