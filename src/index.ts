@@ -568,7 +568,7 @@ const index = ({
     const hexColor = `#${rgbToHex(colors[i] as RGBA)}`;
     profile.filamentColor[i] = hexColor;
     profile.extruderColor[i] = hexColor;
-    profile.filamentSettingsId[i] = material.name;
+    profile.filamentSettingsId[i] = material.name.replace(/"/g, '\\"');
   }
 
   // transition settings
