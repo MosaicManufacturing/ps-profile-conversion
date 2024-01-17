@@ -672,6 +672,7 @@ const index = ({
   // start sequence
   profile.startGcode = [
     ';*/*/*/*/* START SEQUENCE */*/*/*/*',
+    `M191 S${chamberTemperature}`,
     'M190 S[first_layer_bed_temperature]',
     'M104 S[first_layer_temperature]',
     ';*/*/*/*/* ENDSTART SEQUENCE */*/*/*/*',
