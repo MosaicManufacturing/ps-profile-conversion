@@ -113,11 +113,40 @@ const index = ({
     }
   }
 
-  // bed shape and Z-offset
+  // bed shape
   profile.bedCircular = machine.circular;
   profile.bedSize = [...machine.bedSize];
   profile.originOffset = [...machine.originOffset, 0];
-  profile.zOffset = style.zOffset;
+
+  // bed offset Z logic:
+  // - ignore inputs we know we won't be using
+  // - only look at project's z-offset setting if no inputs have a material override
+  // - use the highest z-offset seen (including 0)
+  let useZOffsetFromStyle = true;
+  for (let i = 0; i < extruderCount; i++) {
+    if (drivesUsed[i]) {
+      const material = materials[i] as Material;
+      if (material.style.useZOffset) {
+        useZOffsetFromStyle = false;
+        break;
+      }
+    }
+  }
+
+  let zOffset = -Infinity;
+  if (useZOffsetFromStyle) {
+    zOffset = style.zOffset ?? 0;
+  } else {
+    for (let i = 0; i < extruderCount; i++) {
+      if (drivesUsed[i]) {
+        const material = materials[i] as Material;
+        if (material.style.useZOffset && material.style.zOffset !== undefined) {
+          zOffset = Math.max(zOffset, material.style.zOffset);
+        }
+      }
+    }
+  }
+  profile.zOffset = zOffset;
 
   // comments
   // (force-enabled for use in postprocessing, may be stripped later)

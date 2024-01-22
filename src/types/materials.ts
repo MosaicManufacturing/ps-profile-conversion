@@ -17,6 +17,7 @@ export interface MaterialStyleValues {
   bridgingFanSpeed: NumericStyleVariant<'%'> | AutoStyleVariant;
   towerSpeed: number;
   maxBridgingSpeed: number;
+  zOffset: number;
 }
 
 export type MaterialStyleFlags = {
