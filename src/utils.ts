@@ -24,7 +24,7 @@ export const getMaterialFieldValue = <T extends keyof MaterialStyleValues>(
   fieldName: T,
   defaultValue: MaterialStyleValues[T]
 ): MaterialStyleValues[T] => {
-  const firstChar = (fieldName[0] as string).toUpperCase();
+  const firstChar = fieldName[0]!.toUpperCase();
   const remainingChars = fieldName.slice(1);
   const useField = `use${firstChar}${remainingChars}` as keyof MaterialStyleFlags;
   return material.style[useField] ? material.style[fieldName] : defaultValue;
@@ -59,7 +59,7 @@ export const validateArrayLengths = (
       const err = new Error(`Expected ${extCount} x ${extCount} transition lengths`);
       if (transitionLengths.length < extCount) throw err;
       for (let i = 0; i < extCount; i++) {
-        const row = transitionLengths[i] as (number | null)[];
+        const row = transitionLengths[i]!;
         if (row.length < extCount) throw err;
       }
     } else if (variableTransitions.driveColorStrengths.length < extCount) {

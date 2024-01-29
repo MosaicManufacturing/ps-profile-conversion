@@ -5,7 +5,13 @@ export enum PerimeterOrder {
 }
 
 export enum SolidFillStyle {
-  Auto = -1, // for topSolidLayerStyle only
+  Rectilinear = 0,
+  Monotonic = 1,
+  Concentric = 2,
+}
+
+export enum TopSolidFillStyle {
+  Auto = -1,
   Rectilinear = 0,
   Monotonic = 1,
   Concentric = 2,
@@ -54,8 +60,8 @@ export interface StyleSettings {
   rapidZSpeed: number;
   monotonicSweep: boolean;
   solidLayerSpeed: number;
-  solidLayerStyle: Omit<SolidFillStyle, SolidFillStyle.Auto>;
-  topSolidLayerStyle: SolidFillStyle;
+  solidLayerStyle: SolidFillStyle;
+  topSolidLayerStyle: TopSolidFillStyle;
   useIroning: boolean;
   ironingFlowrate: NumericStyleVariant<'%'> | AutoStyleVariant;
   ironingSpacing: NumericStyleVariant<'mm'> | AutoStyleVariant;

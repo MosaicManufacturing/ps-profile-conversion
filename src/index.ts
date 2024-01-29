@@ -8,7 +8,7 @@ import type { PaletteData } from './types/palette';
 import type { MachineSettings } from './types/printers';
 import { Firmware } from './types/printers';
 import type { StyleSettings } from './types/styles';
-import type { DriveColorStrength, TransitionTower, VariableTransitions } from './types/transitions';
+import type { TransitionTower, VariableTransitions } from './types/transitions';
 import {
   getMaterialFieldValue,
   getTransitionLength,
@@ -103,11 +103,11 @@ const index = ({
   // nozzle diameter(s)
   // filament diameters
   for (let i = 0; i < extruderCount; i++) {
-    const material = materials[i] as Material;
+    const material = materials[i]!;
     const machineExtruderIndex = i >= machine.nozzleDiameter.length ? 0 : i;
-    profile.nozzleDiameter[i] = machine.nozzleDiameter[machineExtruderIndex] as number;
+    profile.nozzleDiameter[i] = machine.nozzleDiameter[machineExtruderIndex]!;
     if (material.id === '0' && machine.filamentDiameter) {
-      profile.filamentDiameter[i] = machine.filamentDiameter[machineExtruderIndex] as number;
+      profile.filamentDiameter[i] = machine.filamentDiameter[machineExtruderIndex]!;
     } else {
       profile.filamentDiameter[i] = material.diameter;
     }
@@ -125,7 +125,7 @@ const index = ({
   let useZOffsetFromStyle = true;
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
-      const material = materials[i] as Material;
+      const material = materials[i]!;
       if (material.style.useZOffset) {
         useZOffsetFromStyle = false;
         break;
@@ -139,7 +139,7 @@ const index = ({
   } else {
     for (let i = 0; i < extruderCount; i++) {
       if (drivesUsed[i]) {
-        const material = materials[i] as Material;
+        const material = materials[i]!;
         if (material.style.useZOffset && material.style.zOffset !== undefined) {
           zOffset = Math.max(zOffset, material.style.zOffset);
         }
@@ -245,7 +245,7 @@ const index = ({
     }
   }
   if (style.solidLayerStyle !== undefined) {
-    profile.bottomFillPattern = convertSolidFillStyle(style.solidLayerStyle as number);
+    profile.bottomFillPattern = convertSolidFillStyle(style.solidLayerStyle);
   } else if (style.monotonicSweep) {
     profile.bottomFillPattern = SolidFillPattern.MONOTONIC;
   } else {
@@ -431,7 +431,7 @@ const index = ({
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
       const bedTemperatureMaterial = getMaterialFieldValue(
-        materials[i] as Material,
+        materials[i]!,
         'bedTemperature',
         style.bedTemperature
       );
@@ -446,7 +446,7 @@ const index = ({
   let useChamberTemperatureFromStyle = true;
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
-      const material = materials[i] as Material;
+      const material = materials[i]!;
       if (material.style.useChamberTemperature) {
         useChamberTemperatureFromStyle = false;
         break;
@@ -459,7 +459,7 @@ const index = ({
   } else {
     for (let i = 0; i < extruderCount; i++) {
       if (drivesUsed[i]) {
-        const material = materials[i] as Material;
+        const material = materials[i]!;
         if (material.style.useChamberTemperature && material.style.chamberTemperature !== undefined) {
           chamberTemperature = Math.min(chamberTemperature, material.style.chamberTemperature);
         }
@@ -469,7 +469,7 @@ const index = ({
   profile.chamberTemperature = chamberTemperature;
 
   for (let i = 0; i < extruderCount; i++) {
-    const material = materials[i] as Material;
+    const material = materials[i]!;
     profile.bedTemperature[i] = bedTemperature;
     profile.firstLayerBedTemperature[i] = bedTemperature;
 
@@ -506,7 +506,7 @@ const index = ({
   // extrusion multiplier
   for (let i = 0; i < extruderCount; i++) {
     const extrusionMultiplierInt = getMaterialFieldValue(
-      materials[i] as Material,
+      materials[i]!,
       'extrusionMultiplier',
       style.extrusionMultiplier
     );
@@ -515,7 +515,7 @@ const index = ({
 
   // cooling fan
   for (let i = 0; i < extruderCount; i++) {
-    const material = materials[i] as Material;
+    const material = materials[i]!;
     profile.slowdownBelowLayerTime[i] = style.minLayerTime;
     const useFan = getMaterialFieldValue(material, 'useFan', style.useFan);
     if (useFan) {
@@ -552,7 +552,7 @@ const index = ({
 
   // retraction
   for (let i = 0; i < extruderCount; i++) {
-    const material = materials[i] as Material;
+    const material = materials[i]!;
     if (style.useRetracts || style.useRetracts === undefined) {
       const retractLength = getMaterialFieldValue(material, 'retractLength', style.retractLength);
       profile.retractLength[i] = retractLength;
@@ -573,7 +573,7 @@ const index = ({
 
   // max flowrate
   for (let i = 0; i < extruderCount; i++) {
-    const maxMaterialFlowrate = getMaterialFieldValue(materials[i] as Material, 'maxPrintSpeed', {
+    const maxMaterialFlowrate = getMaterialFieldValue(materials[i]!, 'maxPrintSpeed', {
       units: 'mm/s',
       value: 0,
     });
@@ -593,8 +593,8 @@ const index = ({
 
   // material names and colors
   for (let i = 0; i < extruderCount; i++) {
-    const material = materials[i] as Material;
-    const hexColor = `#${rgbToHex(colors[i] as RGBA)}`;
+    const material = materials[i]!;
+    const hexColor = `#${rgbToHex(colors[i]!)}`;
     profile.filamentColor[i] = hexColor;
     profile.extruderColor[i] = hexColor;
     profile.filamentSettingsId[i] = material.name.replace(/"/g, '\\"');
@@ -609,7 +609,7 @@ const index = ({
       // - https://github.com/prusa3d/PrusaSlicer/issues/599
       profile.supportMaterialContactDistance = 0;
       for (let i = 0; i < extruderCount; i++) {
-        const material = materials[i] as Material;
+        const material = materials[i]!;
         // need to override "minimum travel before retraction" with towers because
         // it takes precedence over "retract on layer change" and it's important
         // for postprocessing that travel sequences are consistent
@@ -638,8 +638,8 @@ const index = ({
       for (let i = 0; i < extruderCount; i++) {
         for (let j = 0; j < extruderCount; j++) {
           if (i !== j) {
-            (profile.wipingVolumesMatrix[i] as number[])[j] = filamentLengthToVolume(
-              (variableTransitionLengths.transitionLengths[i] as number[])[j] as number
+            profile.wipingVolumesMatrix[i]![j] = filamentLengthToVolume(
+              variableTransitionLengths.transitionLengths[i]![j]!
             );
           }
         }
@@ -649,9 +649,9 @@ const index = ({
       for (let ingoing = 0; ingoing < extruderCount; ingoing++) {
         for (let outgoing = 0; outgoing < extruderCount; outgoing++) {
           if (ingoing !== outgoing) {
-            const ingoingStrength = driveColorStrengths[ingoing] as DriveColorStrength;
-            const outgoingStrength = driveColorStrengths[outgoing] as DriveColorStrength;
-            (profile.wipingVolumesMatrix[ingoing] as number[])[outgoing] = filamentLengthToVolume(
+            const ingoingStrength = driveColorStrengths[ingoing]!;
+            const outgoingStrength = driveColorStrengths[outgoing]!;
+            profile.wipingVolumesMatrix[ingoing]![outgoing] = filamentLengthToVolume(
               getTransitionLength(ingoingStrength, outgoingStrength, minTransitionLength, maxTransitionLength)
             );
           }
@@ -666,7 +666,7 @@ const index = ({
       profile.wipingVolumesExtruders[i] = [halfTransitionVolume, halfTransitionVolume];
       for (let j = 0; j < extruderCount; j++) {
         if (i !== j) {
-          (profile.wipingVolumesMatrix[i] as number[])[j] = transitionVolume;
+          profile.wipingVolumesMatrix[i]![j] = transitionVolume;
         }
       }
     }
@@ -739,7 +739,7 @@ const index = ({
 
   // material change sequence
   for (let i = 0; i < extruderCount; i++) {
-    const material = materials[i] as Material;
+    const material = materials[i]!;
     if (material.materialChangeSequence) {
       profile.startFilamentGcode[i] = `;*/*/*/*/* MATERIAL CHANGE SEQUENCE (${i}) */*/*/*/*`;
       if (material.materialChangeSequence.startsWith('@printerscript')) {
