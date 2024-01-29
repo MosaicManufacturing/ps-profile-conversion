@@ -614,13 +614,16 @@ const index = ({
         // it takes precedence over "retract on layer change" and it's important
         // for postprocessing that travel sequences are consistent
         profile.retractBeforeTravel[i] = 0;
+        let towerSpeed;
         if (material.style.useTowerSpeed) {
-          profile.towerSpeed[i] = material.style.towerSpeed;
+          towerSpeed = material.style.towerSpeed;
         } else if (style.towerSpeed && style.towerSpeed.value !== 'auto') {
-          profile.towerSpeed[i] = style.towerSpeed.value;
+          towerSpeed = style.towerSpeed.value;
         } else {
-          profile.towerSpeed[i] = profile.infillSpeed;
+          towerSpeed = profile.infillSpeed;
         }
+        profile.towerSpeed[i] = towerSpeed;
+        profile.firstLayerTowerSpeed[i] = Math.min(towerSpeed, profile.firstLayerSpeed);
       }
       if (style.towerExtrusionWidth && style.towerExtrusionWidth.units === 'mm') {
         profile.towerExtrusionWidth = style.towerExtrusionWidth.value;
