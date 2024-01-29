@@ -310,6 +310,7 @@ export default class Profile {
   // not used by PrusaSlicer
   clearBufferCommand = 'G4 P0';
   towerSpeed: number[];
+  firstLayerTowerSpeed: number[];
   towerExtrusionWidth = 0.45;
   chamberTemperature = 0;
   layerGcodePrinterscript = '';
@@ -395,6 +396,7 @@ export default class Profile {
       .fill(0)
       .map((_, i) => new Array(extruderCount).fill(0).map((__, j) => (i === j ? 0 : 140)));
     this.towerSpeed = new Array(extruderCount).fill(0);
+    this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
   }
 
