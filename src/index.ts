@@ -682,7 +682,9 @@ const index = ({
     case 'daf':
       profile.useFirmwareRetraction = false;
       profile.filamentDiameter = new Array(extruderCount).fill(1.75);
+      profile.preSideTransitionPrinterscript = '';
       profile.sideTransitionPrinterscript = '';
+      profile.postSideTransitionPrinterscript = '';
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
