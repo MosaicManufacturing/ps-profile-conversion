@@ -53,7 +53,7 @@ export default class Profile {
   defaultPrintProfile = '';
   deretractSpeed: number[];
   disableFanFirstLayers: number[];
-  dontSupportBridges = true;
+  dontSupportBridges = false;
   draftShield = DraftShieldMode.DISABLED;
   duplicateDistance = 6;
   elephantFootCompensation = 0;
