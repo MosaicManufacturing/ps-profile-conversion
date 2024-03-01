@@ -7,7 +7,7 @@ import type { Material } from './types/materials';
 import type { PaletteData } from './types/palette';
 import type { MachineSettings } from './types/printers';
 import { Firmware } from './types/printers';
-import type { StyleSettings } from './types/styles';
+import { type StyleSettings, TransitionMethod } from './types/styles';
 import type { TransitionTower, VariableTransitions } from './types/transitions';
 import {
   getMaterialFieldValue,
@@ -681,6 +681,10 @@ const index = ({
     case 'mcfx':
     case 'daf':
       profile.useFirmwareRetraction = false;
+      profile.filamentDiameter = new Array(extruderCount).fill(1.75);
+      profile.preSideTransitionPrinterscript = '';
+      profile.sideTransitionPrinterscript = '';
+      profile.postSideTransitionPrinterscript = '';
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
@@ -753,7 +757,8 @@ const index = ({
     }
   }
 
-  if (style.transitionMethod === 2) {
+  // DAF printers are always considered as using side transitions
+  if (style.transitionMethod === TransitionMethod.Side || machine.extension === 'daf') {
     if (machine.preSideTransitionSequence) {
       if (machine.preSideTransitionSequence.startsWith('@printerscript')) {
         profile.preSideTransitionPrinterscript = machine.preSideTransitionSequence;
