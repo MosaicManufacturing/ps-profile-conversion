@@ -151,4 +151,7 @@ export interface StyleSettings {
   towerSpeed: NumericStyleVariant<'mm/s'> | AutoStyleVariant;
   towerExtrusionWidth: NumericStyleVariant<'mm'> | AutoStyleVariant;
   sideTransitionPurgeSpeed: number;
+  useCoolingModule: boolean;
+  coolingModuleSpeed: number;
+  enableCoolingModuleAtLayer: number;
 }

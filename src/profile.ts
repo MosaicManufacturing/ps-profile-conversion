@@ -309,6 +309,8 @@ export default class Profile {
 
   // not used by PrusaSlicer
   clearBufferCommand = 'G4 P0';
+  coolingModuleSpeed: number[];
+  enableCoolingModuleAtLayer: number[];
   towerSpeed: number[];
   firstLayerTowerSpeed: number[];
   towerExtrusionWidth = 0.45;
@@ -326,6 +328,7 @@ export default class Profile {
     this.bottomFillPattern = SolidFillPattern.MONOTONIC;
     this.bridgeFanSpeed = new Array(extruderCount).fill(100);
     this.cooling = new Array(extruderCount).fill(true);
+    this.coolingModuleSpeed = new Array(extruderCount).fill(100);
     this.deretractSpeed = new Array(extruderCount).fill(0);
     this.disableFanFirstLayers = new Array(extruderCount).fill(1);
     this.endFilamentGcode = new Array(extruderCount).fill('');
@@ -398,6 +401,7 @@ export default class Profile {
     this.towerSpeed = new Array(extruderCount).fill(0);
     this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
+    this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
   }
 
   getBedShapeString() {
@@ -461,6 +465,7 @@ export default class Profile {
 ; cooling = ${this.cooling.map(boolToIntString).join(',')}
 ; cooling_tube_length = ${this.coolingTubeLength}
 ; cooling_tube_retraction = ${this.coolingTubeRetraction}
+; cooling_module_speed = ${this.coolingModuleSpeed.join(',')}
 ; default_acceleration = ${this.defaultAcceleration}
 ; default_filament_profile = "${this.defaultFilamentProfile}"
 ; default_print_profile = ${this.defaultPrintProfile}
@@ -472,6 +477,7 @@ export default class Profile {
 ; elefant_foot_compensation = ${this.elephantFootCompensation}
 ; end_filament_gcode = ${this.endFilamentGcode.map((gcode) => (gcode ? `"${gcode}"` : '";"')).join(';')}
 ; end_gcode = ${this.endGcode || ';'}
+; enable_cooling_module_at_layer = ${this.enableCoolingModuleAtLayer.join(',')}
 ; ensure_vertical_shell_thickness = ${boolToIntString(this.ensureVerticalShellThickness)}
 ; external_perimeter_extrusion_width = ${this.externalPerimeterExtrusionWidth}
 ; external_perimeter_speed = ${this.externalPerimeterSpeed}
