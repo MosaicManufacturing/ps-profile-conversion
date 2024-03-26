@@ -18,6 +18,9 @@ export interface MaterialStyleValues {
   towerSpeed: number;
   maxBridgingSpeed: number;
   zOffset: number;
+  useCoolingModule: boolean;
+  coolingModuleSpeed: number;
+  enableCoolingModuleAtLayer: number;
 }
 
 export type MaterialStyleFlags = {
