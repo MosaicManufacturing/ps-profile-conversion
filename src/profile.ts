@@ -465,7 +465,6 @@ export default class Profile {
 ; cooling = ${this.cooling.map(boolToIntString).join(',')}
 ; cooling_tube_length = ${this.coolingTubeLength}
 ; cooling_tube_retraction = ${this.coolingTubeRetraction}
-; cooling_module_speed = ${this.coolingModuleSpeed.join(',')}
 ; default_acceleration = ${this.defaultAcceleration}
 ; default_filament_profile = "${this.defaultFilamentProfile}"
 ; default_print_profile = ${this.defaultPrintProfile}
@@ -477,7 +476,6 @@ export default class Profile {
 ; elefant_foot_compensation = ${this.elephantFootCompensation}
 ; end_filament_gcode = ${this.endFilamentGcode.map((gcode) => (gcode ? `"${gcode}"` : '";"')).join(';')}
 ; end_gcode = ${this.endGcode || ';'}
-; enable_cooling_module_at_layer = ${this.enableCoolingModuleAtLayer.join(',')}
 ; ensure_vertical_shell_thickness = ${boolToIntString(this.ensureVerticalShellThickness)}
 ; external_perimeter_extrusion_width = ${this.externalPerimeterExtrusionWidth}
 ; external_perimeter_speed = ${this.externalPerimeterSpeed}
