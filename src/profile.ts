@@ -328,7 +328,6 @@ export default class Profile {
     this.bottomFillPattern = SolidFillPattern.MONOTONIC;
     this.bridgeFanSpeed = new Array(extruderCount).fill(100);
     this.cooling = new Array(extruderCount).fill(true);
-    this.coolingModuleSpeed = new Array(extruderCount).fill(100);
     this.deretractSpeed = new Array(extruderCount).fill(0);
     this.disableFanFirstLayers = new Array(extruderCount).fill(1);
     this.endFilamentGcode = new Array(extruderCount).fill('');
@@ -402,6 +401,7 @@ export default class Profile {
     this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
     this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
+    this.coolingModuleSpeed = new Array(extruderCount).fill(100);
   }
 
   getBedShapeString() {
