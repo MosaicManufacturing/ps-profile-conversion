@@ -550,6 +550,35 @@ const index = ({
     }
   }
 
+  // cooling module
+  for (let i = 0; i < extruderCount; i++) {
+    const material = materials[i]!;
+    const useCoolingModule = getMaterialFieldValue(material, 'useCoolingModule', style.useCoolingModule);
+    if (useCoolingModule) {
+      const coolingModuleSpeedMaterial = getMaterialFieldValue(
+        material,
+        'coolingModuleSpeed',
+        style.coolingModuleSpeed
+      );
+      const enableCoolingModuleAtLayerMaterial = getMaterialFieldValue(
+        material,
+        'enableCoolingModuleAtLayer',
+        style.enableCoolingModuleAtLayer
+      );
+      if (coolingModuleSpeedMaterial <= 0) {
+        profile.coolingModuleSpeed[i] = 0;
+        // initialize the value to twice the bed height to guarantee that it will not be activated
+        profile.enableCoolingModuleAtLayer[i] = machine.bedSize[2] * 2;
+      } else {
+        profile.coolingModuleSpeed[i] = coolingModuleSpeedMaterial;
+        profile.enableCoolingModuleAtLayer[i] = enableCoolingModuleAtLayerMaterial;
+      }
+    } else {
+      profile.coolingModuleSpeed[i] = 0;
+      profile.enableCoolingModuleAtLayer[i] = machine.bedSize[2] * 2;
+    }
+  }
+
   // retraction
   for (let i = 0; i < extruderCount; i++) {
     const material = materials[i]!;

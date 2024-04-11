@@ -309,6 +309,8 @@ export default class Profile {
 
   // not used by PrusaSlicer
   clearBufferCommand = 'G4 P0';
+  coolingModuleSpeed: number[];
+  enableCoolingModuleAtLayer: number[];
   towerSpeed: number[];
   firstLayerTowerSpeed: number[];
   towerExtrusionWidth = 0.45;
@@ -398,6 +400,8 @@ export default class Profile {
     this.towerSpeed = new Array(extruderCount).fill(0);
     this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
+    this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
+    this.coolingModuleSpeed = new Array(extruderCount).fill(100);
   }
 
   getBedShapeString() {
