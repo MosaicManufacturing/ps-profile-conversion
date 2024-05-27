@@ -44,17 +44,15 @@ export const convertToPrinterScript = (sequence: string, isStartSequence = false
 export const applyStartSequenceDefaults = (
   sequence: string,
   primaryExtruder: number,
-  bedTemp: number,
   chamberTemp: number
 ): string => {
   const hasPrintTemp =
     sequence.includes('{{printTemperature}}') || sequence.includes('{{firstLayerPrintTemperature}}');
   const hasBedTemp = sequence.includes('{{bedTemperature}}');
   const hasChamberTemp = sequence.includes('{{chamberTemperature}}');
-  const bedTempUsed = bedTemp > 0;
   const chamberTempUsed = chamberTemp > 0;
   const addPrintTemp = !hasPrintTemp;
-  const addBedTemp = !hasBedTemp && bedTempUsed;
+  const addBedTemp = !hasBedTemp;
   const addChamberTemp = !hasChamberTemp && chamberTempUsed;
 
   const printTempCommand = `"M104 S{{firstLayerPrintTemperature}} T${primaryExtruder}"`;

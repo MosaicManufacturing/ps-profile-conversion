@@ -724,14 +724,9 @@ const index = ({
   }
 
   // apply start sequence defaults
-
-  // Use the highest bed temperature from the profile to decide
-  // whether to add bed temp commands to start sequence, if none exists
-  const bedTemperature = Math.max(...profile.bedTemperature);
   profile.startGcodePrinterscript = applyStartSequenceDefaults(
     profile.startGcodePrinterscript,
     palette ? palette.extruder : 0,
-    bedTemperature,
     chamberTemperature
   );
 
