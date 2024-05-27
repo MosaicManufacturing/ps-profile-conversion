@@ -118,35 +118,13 @@ const index = ({
   profile.bedSize = [...machine.bedSize];
   profile.originOffset = [...machine.originOffset, 0];
 
-  // bed offset Z logic:
-  // - ignore inputs we know we won't be using
-  // - only look at project's z-offset setting if no inputs have a material override
-  // - use the highest z-offset seen (including 0)
-  let useZOffsetFromStyle = true;
+  // bed offset Z
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
-      const material = materials[i]!;
-      if (material.style.useZOffset) {
-        useZOffsetFromStyle = false;
-        break;
-      }
+      const zOffset = getMaterialFieldValue(materials[i]!, 'zOffset', style.zOffset);
+      profile.zOffset[i] = zOffset;
     }
   }
-
-  let zOffset = -Infinity;
-  if (useZOffsetFromStyle) {
-    zOffset = style.zOffset ?? 0;
-  } else {
-    for (let i = 0; i < extruderCount; i++) {
-      if (drivesUsed[i]) {
-        const material = materials[i]!;
-        if (material.style.useZOffset && material.style.zOffset !== undefined) {
-          zOffset = Math.max(zOffset, material.style.zOffset);
-        }
-      }
-    }
-  }
-  profile.zOffset = zOffset;
 
   // comments
   // (force-enabled for use in postprocessing, may be stripped later)
@@ -427,7 +405,6 @@ const index = ({
   }
 
   // temperatures
-  let bedTemperature = 0;
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
       const bedTemperatureMaterial = getMaterialFieldValue(
@@ -435,7 +412,8 @@ const index = ({
         'bedTemperature',
         style.bedTemperature
       );
-      bedTemperature = Math.max(bedTemperature, bedTemperatureMaterial);
+      profile.bedTemperature[i] = bedTemperatureMaterial;
+      profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
     }
   }
 
@@ -470,9 +448,6 @@ const index = ({
 
   for (let i = 0; i < extruderCount; i++) {
     const material = materials[i]!;
-    profile.bedTemperature[i] = bedTemperature;
-    profile.firstLayerBedTemperature[i] = bedTemperature;
-
     const printTemperatureMaterial = getMaterialFieldValue(
       material,
       'printTemperature',
@@ -747,7 +722,12 @@ const index = ({
   } else {
     profile.startGcodePrinterscript = convertToPrinterScript(machine.startSequence, true);
   }
+
   // apply start sequence defaults
+
+  // Use the highest bed temperature from the profile to decide
+  // whether to add bed temp commands to start sequence, if none exists
+  const bedTemperature = Math.max(...profile.bedTemperature);
   profile.startGcodePrinterscript = applyStartSequenceDefaults(
     profile.startGcodePrinterscript,
     palette ? palette.extruder : 0,
