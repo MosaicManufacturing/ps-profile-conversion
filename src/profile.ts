@@ -305,7 +305,7 @@ export default class Profile {
   wipingVolumesExtruders: [number, number][];
   wipingVolumesMatrix: number[][];
   xySizeCompensation = 0;
-  zOffset: number[];
+  zOffset = 0;
 
   // not used by PrusaSlicer
   clearBufferCommand = 'G4 P0';
@@ -322,6 +322,7 @@ export default class Profile {
   preSideTransitionPrinterscript = '';
   sideTransitionPrinterscript = '';
   postSideTransitionPrinterscript = '';
+  zOffsetPerExt: number[];
 
   constructor(extruderCount: number) {
     this.bedTemperature = new Array(extruderCount).fill(0);
@@ -402,7 +403,7 @@ export default class Profile {
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
     this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
     this.coolingModuleSpeed = new Array(extruderCount).fill(100);
-    this.zOffset = new Array(extruderCount).fill(0);
+    this.zOffsetPerExt = new Array(extruderCount).fill(0);
   }
 
   getBedShapeString() {

@@ -118,12 +118,43 @@ const index = ({
   profile.bedSize = [...machine.bedSize];
   profile.originOffset = [...machine.originOffset, 0];
 
-  // bed offset Z
-  for (let i = 0; i < extruderCount; i++) {
-    if (drivesUsed[i]) {
-      const zOffset = getMaterialFieldValue(materials[i]!, 'zOffset', style.zOffset);
-      profile.zOffset[i] = zOffset;
+  // bed offset Z logic:
+  if (palette) {
+    for (let i = 0; i < extruderCount; i++) {
+      if (drivesUsed[i]) {
+        const zOffset = getMaterialFieldValue(materials[i]!, 'zOffset', style.zOffset);
+        profile.zOffsetPerExt[i] = zOffset;
+      }
     }
+    profile.zOffset = 0;
+  } else {
+    // - ignore inputs we know we won't be using
+    // - only look at project's z-offset setting if no inputs have a material override
+    // - use the highest z-offset seen (including 0)
+    let useZOffsetFromStyle = true;
+    for (let i = 0; i < extruderCount; i++) {
+      if (drivesUsed[i]) {
+        const material = materials[i]!;
+        if (material.style.useZOffset) {
+          useZOffsetFromStyle = false;
+          break;
+        }
+      }
+    }
+    let zOffset = -Infinity;
+    if (useZOffsetFromStyle) {
+      zOffset = style.zOffset ?? 0;
+    } else {
+      for (let i = 0; i < extruderCount; i++) {
+        if (drivesUsed[i]) {
+          const material = materials[i]!;
+          if (material.style.useZOffset && material.style.zOffset !== undefined) {
+            zOffset = Math.max(zOffset, material.style.zOffset);
+          }
+        }
+      }
+    }
+    profile.zOffset = zOffset;
   }
 
   // comments
@@ -405,6 +436,7 @@ const index = ({
   }
 
   // temperatures
+  const maxBedTemperature = Math.max(...profile.bedTemperature);
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
       const bedTemperatureMaterial = getMaterialFieldValue(
@@ -412,8 +444,13 @@ const index = ({
         'bedTemperature',
         style.bedTemperature
       );
-      profile.bedTemperature[i] = bedTemperatureMaterial;
-      profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
+      if (palette) {
+        profile.bedTemperature[i] = bedTemperatureMaterial;
+        profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
+      } else {
+        profile.bedTemperature[i] = maxBedTemperature;
+        profile.firstLayerBedTemperature[i] = maxBedTemperature;
+      }
     }
   }
 
@@ -727,6 +764,7 @@ const index = ({
   profile.startGcodePrinterscript = applyStartSequenceDefaults(
     profile.startGcodePrinterscript,
     palette ? palette.extruder : 0,
+    maxBedTemperature,
     chamberTemperature
   );
 
