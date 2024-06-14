@@ -322,6 +322,7 @@ export default class Profile {
   preSideTransitionPrinterscript = '';
   sideTransitionPrinterscript = '';
   postSideTransitionPrinterscript = '';
+  zOffsetPerExt: number[];
 
   constructor(extruderCount: number) {
     this.bedTemperature = new Array(extruderCount).fill(0);
@@ -402,6 +403,7 @@ export default class Profile {
     this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
     this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
     this.coolingModuleSpeed = new Array(extruderCount).fill(100);
+    this.zOffsetPerExt = new Array(extruderCount).fill(0);
   }
 
   getBedShapeString() {
