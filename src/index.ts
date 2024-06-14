@@ -436,7 +436,8 @@ const index = ({
   }
 
   // temperatures
-  const maxBedTemperature = Math.max(...profile.bedTemperature);
+  // bed temperature logic:
+  let maxBedTemperature = 0;
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
       const bedTemperatureMaterial = getMaterialFieldValue(
@@ -444,13 +445,24 @@ const index = ({
         'bedTemperature',
         style.bedTemperature
       );
-      if (palette) {
-        profile.bedTemperature[i] = bedTemperatureMaterial;
-        profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
-      } else {
-        profile.bedTemperature[i] = maxBedTemperature;
-        profile.firstLayerBedTemperature[i] = maxBedTemperature;
-      }
+      maxBedTemperature = Math.max(maxBedTemperature, bedTemperatureMaterial);
+    }
+  }
+
+  for (let i = 0; i < extruderCount; i++) {
+    // if element/ palette is used, use the material's bed temperature
+    if (palette) {
+      const bedTemperatureMaterial = getMaterialFieldValue(
+        materials[i]!,
+        'bedTemperature',
+        style.bedTemperature
+      );
+      profile.bedTemperature[i] = bedTemperatureMaterial;
+      profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
+      // if no palette/element is used, use the highest bed temperature
+    } else {
+      profile.bedTemperature[i] = maxBedTemperature;
+      profile.firstLayerBedTemperature[i] = maxBedTemperature;
     }
   }
 
