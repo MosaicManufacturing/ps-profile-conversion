@@ -437,7 +437,7 @@ const index = ({
 
   // temperatures
   // bed temperature logic:
-  let maxBedTemperature = 0;
+  let usedHintMaxBedTemp = 0;
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
       const bedTemperatureMaterial = getMaterialFieldValue(
@@ -445,7 +445,7 @@ const index = ({
         'bedTemperature',
         style.bedTemperature
       );
-      maxBedTemperature = Math.max(maxBedTemperature, bedTemperatureMaterial);
+      usedHintMaxBedTemp = Math.max(usedHintMaxBedTemp, bedTemperatureMaterial);
     }
   }
 
@@ -461,8 +461,8 @@ const index = ({
       profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
       // if no palette/element is used, use the highest bed temperature
     } else {
-      profile.bedTemperature[i] = maxBedTemperature;
-      profile.firstLayerBedTemperature[i] = maxBedTemperature;
+      profile.bedTemperature[i] = usedHintMaxBedTemp;
+      profile.firstLayerBedTemperature[i] = usedHintMaxBedTemp;
     }
   }
 
@@ -776,7 +776,7 @@ const index = ({
   profile.startGcodePrinterscript = applyStartSequenceDefaults(
     profile.startGcodePrinterscript,
     palette ? palette.extruder : 0,
-    maxBedTemperature,
+    usedHintMaxBedTemp,
     chamberTemperature
   );
 
