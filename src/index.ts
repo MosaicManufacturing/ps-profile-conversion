@@ -459,8 +459,8 @@ const index = ({
       );
       profile.bedTemperature[i] = bedTemperatureMaterial;
       profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
-      // if no palette/element is used, use the highest bed temperature
     } else {
+      // if no palette/element is used, use the highest bed temperature
       profile.bedTemperature[i] = usedHintMaxBedTemp;
       profile.firstLayerBedTemperature[i] = usedHintMaxBedTemp;
     }
