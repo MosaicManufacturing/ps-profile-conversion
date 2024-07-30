@@ -120,41 +120,28 @@ const index = ({
 
   // bed offset Z logic:
   if (palette) {
+    /* For multi-material project, we use the highest Z offset
+      among all materials used in the first layer.
+      This logic is handled in a post-processing script.
+      Generate the `zOffsetPerExt` array to store the Z offset for each material.
+    */
     for (let i = 0; i < extruderCount; i++) {
       if (drivesUsed[i]) {
         const zOffset = getMaterialFieldValue(materials[i]!, 'zOffset', style.zOffset);
         profile.zOffsetPerExt[i] = zOffset;
       }
     }
+    // Set `profile.zOffset` to 0 to avoid unnecessary calculations in the post-processing script.
     profile.zOffset = 0;
   } else {
-    // - ignore inputs we know we won't be using
-    // - only look at project's z-offset setting if no inputs have a material override
-    // - use the highest z-offset seen (including 0)
-    let useZOffsetFromStyle = true;
-    for (let i = 0; i < extruderCount; i++) {
-      if (drivesUsed[i]) {
-        const material = materials[i]!;
-        if (material.style.useZOffset) {
-          useZOffsetFromStyle = false;
-          break;
-        }
-      }
-    }
-    let zOffset = -Infinity;
-    if (useZOffsetFromStyle) {
-      zOffset = style.zOffset ?? 0;
+    // Assume the project has only one input for a "non-palette" project
+    // (i.e., it is not an element and does not use a palette).
+    const material = materials[0]!;
+    if (material.style.useZOffset) {
+      profile.zOffset = material.style.zOffset;
     } else {
-      for (let i = 0; i < extruderCount; i++) {
-        if (drivesUsed[i]) {
-          const material = materials[i]!;
-          if (material.style.useZOffset && material.style.zOffset !== undefined) {
-            zOffset = Math.max(zOffset, material.style.zOffset);
-          }
-        }
-      }
+      profile.zOffset = style.zOffset;
     }
-    profile.zOffset = zOffset;
   }
 
   // comments
