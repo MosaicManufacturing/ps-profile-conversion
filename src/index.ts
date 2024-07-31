@@ -134,9 +134,10 @@ const index = ({
     // Set `profile.zOffset` to 0 to avoid unnecessary calculations in the post-processing script.
     profile.zOffset = 0;
   } else {
-    // Assume the project has only one input for a "non-palette" project
-    // (i.e., it is not an element and does not use a palette).
-    const material = materials[0]!;
+    // if no Palette, then only one input is used in the project
+    // but it may not be input 0
+    const singleExtUsed = drivesUsed.findIndex((isDriveUsed) => isDriveUsed);
+    const material = materials[singleExtUsed]!;
     if (material.style.useZOffset) {
       profile.zOffset = material.style.zOffset;
     } else {
