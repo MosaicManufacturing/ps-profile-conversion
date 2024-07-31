@@ -138,11 +138,7 @@ const index = ({
     // but it may not be input 0
     const singleExtUsed = drivesUsed.findIndex((isDriveUsed) => isDriveUsed);
     const material = materials[singleExtUsed]!;
-    if (material.style.useZOffset) {
-      profile.zOffset = material.style.zOffset;
-    } else {
-      profile.zOffset = style.zOffset;
-    }
+    profile.zOffset = getMaterialFieldValue(material, 'zOffset', style.zOffset);
   }
 
   // comments
