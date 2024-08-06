@@ -119,34 +119,27 @@ const index = ({
   profile.originOffset = [...machine.originOffset, 0];
 
   // bed offset Z logic:
-  // - ignore inputs we know we won't be using
-  // - only look at project's z-offset setting if no inputs have a material override
-  // - use the highest z-offset seen (including 0)
-  let useZOffsetFromStyle = true;
-  for (let i = 0; i < extruderCount; i++) {
-    if (drivesUsed[i]) {
-      const material = materials[i]!;
-      if (material.style.useZOffset) {
-        useZOffsetFromStyle = false;
-        break;
-      }
-    }
-  }
-
-  let zOffset = -Infinity;
-  if (useZOffsetFromStyle) {
-    zOffset = style.zOffset ?? 0;
-  } else {
+  if (palette) {
+    /* For multi-material project, we use the highest Z offset
+      among all materials used in the first layer.
+      This logic is handled in a post-processing script.
+      Generate the `zOffsetPerExt` array to store the Z offset for each material.
+    */
     for (let i = 0; i < extruderCount; i++) {
       if (drivesUsed[i]) {
-        const material = materials[i]!;
-        if (material.style.useZOffset && material.style.zOffset !== undefined) {
-          zOffset = Math.max(zOffset, material.style.zOffset);
-        }
+        const zOffset = getMaterialFieldValue(materials[i]!, 'zOffset', style.zOffset);
+        profile.zOffsetPerExt[i] = zOffset;
       }
     }
+    // Set `profile.zOffset` to 0 to avoid unnecessary calculations in the post-processing script.
+    profile.zOffset = 0;
+  } else {
+    // if no Palette, then only one input is used in the project
+    // but it may not be input 0
+    const singleExtUsed = drivesUsed.findIndex((isDriveUsed) => isDriveUsed);
+    const material = materials[singleExtUsed]!;
+    profile.zOffset = getMaterialFieldValue(material, 'zOffset', style.zOffset);
   }
-  profile.zOffset = zOffset;
 
   // comments
   // (force-enabled for use in postprocessing, may be stripped later)
@@ -427,7 +420,8 @@ const index = ({
   }
 
   // temperatures
-  let bedTemperature = 0;
+  // bed temperature logic:
+  let usedHintMaxBedTemp = 0;
   for (let i = 0; i < extruderCount; i++) {
     if (drivesUsed[i]) {
       const bedTemperatureMaterial = getMaterialFieldValue(
@@ -435,7 +429,24 @@ const index = ({
         'bedTemperature',
         style.bedTemperature
       );
-      bedTemperature = Math.max(bedTemperature, bedTemperatureMaterial);
+      usedHintMaxBedTemp = Math.max(usedHintMaxBedTemp, bedTemperatureMaterial);
+    }
+  }
+
+  for (let i = 0; i < extruderCount; i++) {
+    // if element/ palette is used, use the material's bed temperature
+    if (palette) {
+      const bedTemperatureMaterial = getMaterialFieldValue(
+        materials[i]!,
+        'bedTemperature',
+        style.bedTemperature
+      );
+      profile.bedTemperature[i] = bedTemperatureMaterial;
+      profile.firstLayerBedTemperature[i] = bedTemperatureMaterial;
+    } else {
+      // if no palette/element is used, use the highest bed temperature
+      profile.bedTemperature[i] = usedHintMaxBedTemp;
+      profile.firstLayerBedTemperature[i] = usedHintMaxBedTemp;
     }
   }
 
@@ -470,9 +481,6 @@ const index = ({
 
   for (let i = 0; i < extruderCount; i++) {
     const material = materials[i]!;
-    profile.bedTemperature[i] = bedTemperature;
-    profile.firstLayerBedTemperature[i] = bedTemperature;
-
     const printTemperatureMaterial = getMaterialFieldValue(
       material,
       'printTemperature',
@@ -747,11 +755,12 @@ const index = ({
   } else {
     profile.startGcodePrinterscript = convertToPrinterScript(machine.startSequence, true);
   }
+
   // apply start sequence defaults
   profile.startGcodePrinterscript = applyStartSequenceDefaults(
     profile.startGcodePrinterscript,
     palette ? palette.extruder : 0,
-    bedTemperature,
+    usedHintMaxBedTemp,
     chamberTemperature
   );
 
