@@ -44,7 +44,7 @@ export const slic3rInfillStylesToFillPattern = {
   [Slic3rInfillStyles.Gyroid]: InfillPattern.GYROID,
   [Slic3rInfillStyles.AdaptiveCubic]: InfillPattern.ADAPTIVE_CUBIC,
   [Slic3rInfillStyles.Honeycomb3D]: InfillPattern.HONEYCOMB_3D,
-  [Slic3rInfillStyles.Lightning]: InfillPattern.LINE,
+  [Slic3rInfillStyles.Lightning]: InfillPattern.LIGHTNING,
 } as const;
 
 export enum TransitionMethod {
