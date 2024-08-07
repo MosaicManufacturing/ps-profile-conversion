@@ -6,6 +6,8 @@ export type RGB = [number, number, number];
 
 export type RGBA = [number, number, number, number];
 
+export type ValueOf<T> = T[keyof T];
+
 export const roundTo = (value: number, decimalPlaces: number) => {
   const factor = 10 ** decimalPlaces;
   return Math.round(value * factor) / factor;

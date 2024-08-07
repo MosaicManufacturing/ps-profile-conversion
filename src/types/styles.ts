@@ -1,3 +1,6 @@
+import { InfillPattern } from '../enums';
+import type { ValueOf } from '../utils';
+
 export enum PerimeterOrder {
   PerimeterFirst = 0,
   // LoopThenPerimeter = 1,
@@ -24,6 +27,25 @@ export enum InfillStyle {
   CELLULAR = 3,
   // DYNAMIC = 4,
 }
+
+const Slic3rInfillStyles = {
+  Rectilinear: 0,
+  Triangles: 1,
+  Gyroid: 2,
+  AdaptiveCubic: 3,
+  Honeycomb3D: 4,
+  Lightning: 5,
+};
+type Slic3rInfillStyle = ValueOf<typeof Slic3rInfillStyles>;
+
+export const slic3rInfillStylesToFillPattern = {
+  [Slic3rInfillStyles.Rectilinear]: InfillPattern.RECTILINEAR,
+  [Slic3rInfillStyles.Triangles]: InfillPattern.TRIANGLES,
+  [Slic3rInfillStyles.Gyroid]: InfillPattern.GYROID,
+  [Slic3rInfillStyles.AdaptiveCubic]: InfillPattern.ADAPTIVE_CUBIC,
+  [Slic3rInfillStyles.Honeycomb3D]: InfillPattern.HONEYCOMB_3D,
+  [Slic3rInfillStyles.Lightning]: InfillPattern.LINE,
+} as const;
 
 export enum TransitionMethod {
   None = 0,
@@ -154,4 +176,6 @@ export interface StyleSettings {
   useCoolingModule: boolean;
   coolingModuleSpeed: number;
   enableCoolingModuleAtLayer: number;
+  // Defaults will be applied in opal-tide if undefined.
+  slic3rInfillStyle: Slic3rInfillStyle;
 }
