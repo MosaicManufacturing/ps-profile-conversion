@@ -32,6 +32,7 @@ export enum InfillPattern {
   OCTAGRAM_SPIRAL = 'octagramspiral',
   ADAPTIVE_CUBIC = 'adaptivecubic',
   SUPPORT_CUBIC = 'supportcubic',
+  LIGHTNING = 'lightning',
 }
 
 export enum SolidFillPattern {

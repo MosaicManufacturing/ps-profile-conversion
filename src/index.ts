@@ -7,7 +7,7 @@ import type { Material } from './types/materials';
 import type { PaletteData } from './types/palette';
 import type { MachineSettings } from './types/printers';
 import { Firmware } from './types/printers';
-import { type StyleSettings, TransitionMethod } from './types/styles';
+import { slic3rInfillStylesToFillPattern, type StyleSettings, TransitionMethod } from './types/styles';
 import type { TransitionTower, VariableTransitions } from './types/transitions';
 import {
   getMaterialFieldValue,
@@ -30,20 +30,6 @@ const convertSolidFillStyle = (solidFillStyle: number): SolidFillPattern => {
       return SolidFillPattern.CONCENTRIC;
     default:
       return SolidFillPattern.RECTILINEAR;
-  }
-};
-
-const convertInfillStyle = (infillStyle: number): InfillPattern => {
-  switch (infillStyle) {
-    case 0: // straight
-      return InfillPattern.RECTILINEAR;
-    case 1: // octagonal
-      return InfillPattern.HONEYCOMB_3D;
-    case 2: // rounded
-    case 3: // cellular
-      return InfillPattern.GYROID;
-    default:
-      return InfillPattern.RECTILINEAR;
   }
 };
 
@@ -306,7 +292,7 @@ const index = ({
   profile.spiralVase = style.spiralVaseMode;
   profile.infillOverlap = style.infillPerimeterOverlap;
   profile.wipeIntoInfill = style.purgeToInfill;
-  profile.fillPattern = convertInfillStyle(style.infillStyle);
+  profile.fillPattern = slic3rInfillStylesToFillPattern[style.slic3rInfillStyle] ?? InfillPattern.RECTILINEAR;
 
   // speeds
   profile.solidInfillSpeed = style.solidLayerSpeed;
