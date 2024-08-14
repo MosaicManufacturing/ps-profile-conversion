@@ -134,11 +134,9 @@ const index = ({
     // Set `profile.zOffset` to 0 to avoid unnecessary calculations in the post-processing script.
     profile.zOffset = 0;
   } else {
-    // if no Palette, then only one input is used in the project
-    // but it may not be input 0
-    const singleExtUsed = drivesUsed.findIndex((isDriveUsed) => isDriveUsed);
-    const material = materials[singleExtUsed]!;
-    profile.zOffset = getMaterialFieldValue(material, 'zOffset', style.zOffset);
+    // Palette projects that were downgraded, the material list will only include the single used material.
+    // Non-Palette projects will have only one material in the array.
+    profile.zOffset = getMaterialFieldValue(materials[0]!, 'zOffset', style.zOffset);
   }
 
   // comments
