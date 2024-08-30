@@ -38,14 +38,14 @@ const Slic3rInfillStyles = {
 };
 type Slic3rInfillStyle = ValueOf<typeof Slic3rInfillStyles>;
 
-export const slic3rInfillStylesToFillPattern = {
+export const slic3rInfillStylesToFillPattern: Record<Slic3rInfillStyle, InfillPattern> = {
   [Slic3rInfillStyles.Rectilinear]: InfillPattern.RECTILINEAR,
   [Slic3rInfillStyles.Triangles]: InfillPattern.TRIANGLES,
   [Slic3rInfillStyles.Gyroid]: InfillPattern.GYROID,
   [Slic3rInfillStyles.AdaptiveCubic]: InfillPattern.ADAPTIVE_CUBIC,
   [Slic3rInfillStyles.Honeycomb3D]: InfillPattern.HONEYCOMB_3D,
   [Slic3rInfillStyles.Lightning]: InfillPattern.LIGHTNING,
-} as const;
+};
 
 export enum TransitionMethod {
   None = 0,
