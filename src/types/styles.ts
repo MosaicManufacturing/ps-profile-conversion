@@ -176,6 +176,5 @@ export interface StyleSettings {
   useCoolingModule: boolean;
   coolingModuleSpeed: number;
   enableCoolingModuleAtLayer: number;
-  // Defaults will be applied in opal-tide if undefined.
   slic3rInfillStyle: Slic3rInfillStyle;
 }
