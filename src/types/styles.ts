@@ -1,3 +1,5 @@
+import { InfillPattern } from '../enums';
+
 export enum PerimeterOrder {
   PerimeterFirst = 0,
   // LoopThenPerimeter = 1,
@@ -24,6 +26,23 @@ export enum InfillStyle {
   CELLULAR = 3,
   // DYNAMIC = 4,
 }
+export enum Slic3rInfillStyle {
+  Rectilinear = 0,
+  Triangles = 1,
+  Gyroid = 2,
+  AdaptiveCubic = 3,
+  Honeycomb3D = 4,
+  Lightning = 5,
+}
+
+export const slic3rInfillStylesToFillPattern: Readonly<Record<Slic3rInfillStyle, InfillPattern>> = {
+  [Slic3rInfillStyle.Rectilinear]: InfillPattern.RECTILINEAR,
+  [Slic3rInfillStyle.Triangles]: InfillPattern.TRIANGLES,
+  [Slic3rInfillStyle.Gyroid]: InfillPattern.GYROID,
+  [Slic3rInfillStyle.AdaptiveCubic]: InfillPattern.ADAPTIVE_CUBIC,
+  [Slic3rInfillStyle.Honeycomb3D]: InfillPattern.HONEYCOMB_3D,
+  [Slic3rInfillStyle.Lightning]: InfillPattern.LIGHTNING,
+} as const;
 
 export enum TransitionMethod {
   None = 0,
@@ -154,4 +173,5 @@ export interface StyleSettings {
   useCoolingModule: boolean;
   coolingModuleSpeed: number;
   enableCoolingModuleAtLayer: number;
+  slic3rInfillStyle: Slic3rInfillStyle;
 }
