@@ -24,5 +24,5 @@ export interface PaletteData<T extends DeviceType = DeviceType> {
   loadingOffset: number;
   printValue: number;
   calibrationLength: number;
-  getInputCount(): number;
+  getMaxInputCount(): number;
 }
