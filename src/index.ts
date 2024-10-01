@@ -78,7 +78,7 @@ const index = ({
   machineLimits,
 }: Inputs) => {
   // TODO: support dual-extruders here in the future?
-  const maxExtruderCount = palette ? palette.getInputCount() : 1;
+  const maxExtruderCount = palette ? palette.getMaxInputCount() : 1;
   const extruderCount =
     usableInputCount !== null ? Math.min(maxExtruderCount, usableInputCount) : maxExtruderCount;
 
