@@ -1,8 +1,10 @@
 import {
+  ArcFitting,
   BrimType,
   DraftShieldMode,
   FuzzySkinType,
   GCodeFlavor,
+  GcodeLabelObjects,
   InfillPattern,
   IroningType,
   MachineLimitsUsage,
@@ -12,6 +14,7 @@ import {
   SupportInterfacePattern,
   SupportPattern,
   SupportStyle,
+  TopOnePerimeterType,
 } from './enums';
 import { boolToIntString, roundTo } from './utils';
 
@@ -127,7 +130,23 @@ export default class Profile {
   gapFillSpeed = 40;
   gcodeComments = false;
   gcodeFlavor = GCodeFlavor.REPRAP_SPRINTER;
-  gcodeLabelObjects = true; // currently required for Palette postprocessing
+
+  // def = this->add("gcode_label_objects", coEnum);
+  // def->label = L("Label objects");
+  // def->tooltip = L("Selects whether labels should be exported at object boundaries and in what format.\n"
+  //                  "OctoPrint = comments to be consumed by OctoPrint CancelObject plugin.\n"
+  //                  "Firmware = firmware specific G-code (it will be chosen based on firmware flavor and it can end up to be empty).\n\n"
+  //                  "This settings is NOT compatible with Single Extruder Multi Material setup and Wipe into Object / Wipe into Infill.");
+
+  // def->set_enum<LabelObjectsStyle>({
+  //     { "disabled",   L("Disabled") },
+  //     { "octoprint",  L("OctoPrint comments") },
+  //     { "firmware",   L("Firmware-specific") }
+  //     });
+
+  // gcodeLabelObjects = true; // currently required for Palette postprocessing
+  gcodeLabelObjects = GcodeLabelObjects.OCTOPRINT;
+
   gcodeResolution = 0.0125;
   gcodeSubstitutions = '';
   highCurrentOnFilamentSwap = false;
@@ -307,6 +326,636 @@ export default class Profile {
   xySizeCompensation = 0;
   zOffset = 0;
 
+  // new ones
+  // =========
+
+  //; arc_fitting = disabled
+  arcFitting = ArcFitting.DISABLED;
+
+  //   def = this->add("autoemit_temperature_commands", coBool);
+  // def->label = L("Emit temperature commands automatically");
+  // def->tooltip = L("When enabled, PrusaSlicer will check whether your custom Start G-Code contains G-codes to set "
+  //                  "extruder, bed or chamber temperature (M104, M109, M140, M190, M141 and M191). "
+  //                  "If so, the temperatures will not be emitted automatically so you're free to customize "
+  //                  "the order of heating commands and other custom actions. Note that you can use "
+  //                  "placeholder variables for all PrusaSlicer settings, so you can put "
+  //                  "a \"M109 S[first_layer_temperature]\" command wherever you want.\n"
+  //                  "If your custom Start G-Code does NOT contain these G-codes, "
+  //                  "PrusaSlicer will execute the Start G-Code after heated chamber was set to its temperature, "
+  //                  "bed reached its target temperature and extruder just started heating.\n\n"
+  //                  "When disabled, PrusaSlicer will NOT emit commands to heat up extruder, bed or chamber, "
+  //                  "leaving all to Custom Start G-Code.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBool(true));
+
+  // ; autoemit_temperature_commands = 1
+  autoEmitTemperatureCommands = true;
+
+  // def = this->add("avoid_crossing_curled_overhangs", coBool);
+  //   def->label = L("Avoid crossing curled overhangs (Experimental)");
+  //   // TRN PrintSettings: "Avoid crossing curled overhangs (Experimental)"
+  //   def->tooltip = L("Plan travel moves such that the extruder avoids areas where the filament may be curled up. "
+  //                  "This is mostly happening on steeper rounded overhangs and may cause a crash with the nozzle. "
+  //                  "This feature slows down both the print and the G-code generation.");
+  //   def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBool(false));
+
+  // ; avoid_crossing_curled_overhangs = 0
+  avoidCrossingCurledOverhangs = false;
+
+  // def = this->add("binary_gcode", coBool);
+  // def->label = L("Supports binary G-code");
+  // def->tooltip = L("Enable, if the firmware supports binary G-code format (bgcode). "
+  //                  "To generate .bgcode files, make sure you have binary G-code enabled in Configuration->Preferences->Other.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBool(false));
+  // ; binary_gcode = 0
+  binarygcode = false;
+
+  // def = this->add("chamber_minimal_temperature", coInts);
+  // // TRN: Label of a configuration parameter: Minimal chamber temperature
+  // def->label = L("Minimal");
+  // def->full_label = L("Chamber minimal temperature");
+  // def->tooltip = L("Minimal chamber temperature that the printer waits for before the print starts. This allows "
+  //                  "to start the print before the nominal chamber temperature is reached.\nWhen set to zero, "
+  //                  "the minimal chamber temperature is not set in the G-code.");
+  // def->sidetext = L("°C");
+  // def->min = 0;
+  // def->max = 1000;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionInts{ 0 });
+  // ; chamber_minimal_temperature = 0,0
+  chamberMinimalTemperatureActual: number[];
+
+  // def = this->add("chamber_temperature", coInts);
+  // // TRN: Label of a configuration parameter: Nominal chamber temperature.
+  // def->label = L("Nominal");
+  // def->full_label = L("Chamber temperature");
+  // def->tooltip = L("Required chamber temperature for the print.\nWhen set to zero, "
+  //                  "the nominal chamber temperature is not set in the G-code.");
+  // def->sidetext = L("°C");
+  // def->min = 0;
+  // def->max = 1000;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionInts{ 0 });
+  // ; chamber_temperature = 0,0`
+  chamberTemperatureActual: number[];
+
+  // def          = this->add("enable_dynamic_fan_speeds", coBools);
+  // def->label   = L("Enable dynamic fan speeds");
+  // def->tooltip = L("This setting enables dynamic fan speed control on overhangs.");
+  // def->mode    = comExpert;
+  // def->set_default_value(new ConfigOptionBools{false});
+  // ; enable_dynamic_fan_speeds = 0,0
+  enableDynamicFanSpeed: boolean[];
+
+  // def             = this->add("enable_dynamic_overhang_speeds", coBool);
+  // def->label      = L("Enable dynamic overhang speeds");
+  // def->category   = L("Speed");
+  // def->tooltip    = L("This setting enables dynamic speed control on overhangs.");
+  // def->mode       = comExpert;
+  // def->set_default_value(new ConfigOptionBool(false));
+  // ; enable_dynamic_overhang_speeds = 0
+  enableDynamicOverhangSpeed = false;
+
+  //  def = this->add("external_perimeter_acceleration", coFloat);
+  //   def->label = L("External perimeters");
+  //   def->tooltip = L("This is the acceleration your printer will use for external perimeters. "
+  //                    "Set zero to use the value for perimeters.");
+  //   def->sidetext = L("mm/s²");
+  //   def->mode = comExpert;
+  //   def->set_default_value(new ConfigOptionFloat(0));
+  // ; external_perimeter_acceleration = 0
+  externalPerimeterAcceleration = 0;
+
+  // def = this->add("extra_perimeters_on_overhangs", coBool);
+  // def->label = L("Extra perimeters on overhangs (Experimental)");
+  // def->category = L("Layers and Perimeters");
+  // def->tooltip = L("Detect overhang areas where bridges cannot be anchored, and fill them with "
+  //                 "extra perimeter paths. These paths are anchored to the nearby non-overhang area when possible.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBool(false));
+  // ; extra_perimeters_on_overhangs = 0
+  extraPerimetersOnOverhang = false;
+
+  // def = this->add("filament_abrasive", coBools);
+  // def->label = L("Abrasive material");
+  // def->tooltip = L("This flag means that the material is abrasive and requires a hardened nozzle. The value is used by the printer to check it.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBools { false });
+  // ; filament_abrasive = 0,0
+  filamentAbrasive: boolean[];
+
+  // def = this->add("filament_infill_max_crossing_speed", coFloats);
+  // def->label = L("Max crossing infill speed");
+  // def->tooltip = L("Maximum speed allowed for this filament while printing infill with "
+  //                  "self intersections in a single layer. "
+  //                  "Set to zero for no limit.");
+  // def->sidetext = L("mm/s");
+  // def->min = 0;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloats { 0. });
+  // ; filament_infill_max_crossing_speed = 0,0
+  filamentInfillMaxCrossingSpeed: number[];
+
+  // def = this->add("filament_infill_max_speed", coFloats);
+  // def->label = L("Max non-crossing infill speed");
+  // def->tooltip = L("Maximum speed allowed for this filament while printing infill without "
+  //                  "any self intersections in a single layer. "
+  //                  "Set to zero for no limit.");
+  // def->sidetext = L("mm/s");
+  // def->min = 0;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloats { 0. });
+  // ; filament_infill_max_speed = 0,0
+  filamentInfillMaxSpeed: number[];
+
+  // def = this->add("filament_multitool_ramming", coBools);
+  // def->label = L("Enable ramming for multitool setups");
+  // def->tooltip = L("Perform ramming when using multitool printer (i.e. when the 'Single Extruder Multimaterial' in Printer Settings is unchecked). "
+  //                  "When checked, a small amount of filament is rapidly extruded on the wipe tower just before the toolchange. "
+  //                  "This option is only used when the wipe tower is enabled.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBools { false });
+  // ; filament_multitool_ramming = 0,0
+  filamentMultiToolRamming: boolean[];
+
+  // def = this->add("filament_multitool_ramming_flow", coFloats);
+  // def->label = L("Multitool ramming flow");
+  // def->tooltip = L("Flow used for ramming the filament before the toolchange.");
+  // def->sidetext = L("mm³/s");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloats { 10. });
+  // ; filament_multitool_ramming_flow = 10,10
+  filamentMultiToolRammingFlow: number[];
+
+  // def = this->add("filament_multitool_ramming_volume", coFloats);
+  // def->label = L("Multitool ramming volume");
+  // def->tooltip = L("The volume to be rammed before the toolchange.");
+  // def->sidetext = L("mm³");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloats { 10. });
+  // ; filament_multitool_ramming_volume = 10,10
+  filamentMultiToolRammingVolume: number[];
+
+  // def = this->add("filament_purge_multiplier", coPercents);
+  // def->label = L("Purge volume multiplier");
+  // def->tooltip = L("Purging volume on the wipe tower is determined by 'multimaterial_purging' in Printer Settings. "
+  //                  "This option allows to modify the volume on filament level. "
+  //                  "Note that the project can override this by setting project-specific values.");
+  // def->sidetext = L("%");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionPercents { 100 });
+  // ; filament_purge_multiplier = 100%,100%
+  filamentPurgeMultiplier: number[];
+
+  // ; filament_retract_length_toolchange = nil,nil
+  filamentRetractLengthToolChange: Nil[];
+
+  // ; filament_retract_restart_extra_toolchange = nil,nil
+  filamentRetractRestartExtraToolChange: Nil[];
+
+  //   def = this->add("filament_shrinkage_compensation_xy", coPercents);
+  // def->label = L("Shrinkage compensation XY");
+  // def->tooltip = L("Enter your filament shrinkage percentages for the X and Y axes here to apply scaling of the object to "
+  //                  "compensate for shrinkage in the X and Y axes. For example, if you measured 99mm instead of 100mm, "
+  //                  "enter 1%.");
+  // def->sidetext = L("%");
+  // def->mode = comAdvanced;
+  // def->min = -10.;
+  // def->max = 10.;
+  // def->set_default_value(new ConfigOptionPercents { 0 });
+  // ; filament_shrinkage_compensation_xy = 0%,0%
+  filamentShrinkageCompensationXY: number[];
+
+  // def = this->add("filament_shrinkage_compensation_z", coPercents);
+  // def->label = L("Shrinkage compensation Z");
+  // def->tooltip = L("Enter your filament shrinkage percentages for the Z axis here to apply scaling of the object to "
+  //                  "compensate for shrinkage in the Z axis. For example, if you measured 99mm instead of 100mm, "
+  //                  "enter 1%.");
+  // def->sidetext = L("%");
+  // def->mode = comAdvanced;
+  // def->min = -10.;
+  // def->max = 10.;
+  // def->set_default_value(new ConfigOptionPercents { 0. });
+  // ; filament_shrinkage_compensation_z = 0%,0%
+  filamentShrinkageCompensationZ: number[];
+
+  // def = this->add("filament_stamping_distance", coFloats);
+  // def->label = L("Stamping distance measured from the center of the cooling tube");
+  // def->tooltip = L("If set to nonzero value, filament is moved toward the nozzle between the individual cooling moves (\"stamping\"). "
+  //                  "This option configures how long this movement should be before the filament is retracted again.");
+  // def->sidetext = L("mm");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloats { 0. });
+  // ; filament_stamping_distance = 0,0
+  filamentStampingDistance: number[];
+
+  // def = this->add("filament_stamping_loading_speed", coFloats);
+  // def->label = L("Stamping loading speed");
+  // def->tooltip = L("Speed used for stamping.");
+  // def->sidetext = L("mm/s");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloats { 20. });
+  // ; filament_stamping_loading_speed = 20,20
+  filamentStampingLoadingSpeed: number[];
+
+  // ; filament_travel_lift_before_obstacle = nil,nil
+  filamentTravelLiftBeforeObstacle: Nil[];
+  // ; filament_travel_max_lift = nil,nil
+  filamentTravelMaxLift: Nil[];
+  // ; filament_travel_ramping_lift = nil,nil
+  filamentTravelRampLift: Nil[];
+  // ; filament_travel_slope = nil,nil
+  filamentTravelSlope: Nil[];
+
+  //def = this->add_nullable("idle_temperature", coInts);
+  // def->label = L("Idle temperature");
+  // def->tooltip = L("Nozzle temperature when the tool is currently not used in multi-tool setups."
+  //                  "This is only used when 'Ooze prevention' is active in Print Settings.");
+  // def->sidetext = L("°C");
+  // def->min = 0;
+  // def->max = max_temp;
+  // def->set_default_value(new ConfigOptionIntsNullable { ConfigOptionIntsNullable::nil_value() });
+  // ; idle_temperature = nil,nil
+  idleTemperature: number | Nil[];
+
+  // def = this->add("mmu_segmented_region_interlocking_depth", coFloat);
+  // def->label = L("Interlocking depth of a segmented region");
+  // def->tooltip = L("Interlocking depth of a segmented region. It will be ignored if "
+  //                    "\"mmu_segmented_region_max_width\" is zero or if \"mmu_segmented_region_interlocking_depth\""
+  //                    "is bigger then \"mmu_segmented_region_max_width\". Zero disables this feature.");
+  // def->sidetext = L("mm (zero to disable)");
+  // def->min = 0;
+  // def->category = L("Advanced");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloat(0.));
+  // ; mmu_segmented_region_interlocking_depth = 0
+  mmuSegmentedRegionInterlockingDepth = 0;
+
+  // def = this->add("multimaterial_purging", coFloat);
+  // def->label = L("Purging volume");
+  // def->tooltip = L("Determines purging volume on the wipe tower. This can be modified in Filament Settings "
+  //                  "('filament_purge_multiplier') or overridden using project-specific settings.");
+  // def->sidetext = L("mm³");
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloat(140.));
+  // ; multimaterial_purging = 140
+  multiMaterialPurging = 140;
+
+  // def = this->add("nozzle_high_flow", coBools);
+  // def->label = L("High flow nozzle");
+  // def->tooltip = L("High flow nozzles allow higher print speeds.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBools{false});
+  // ; nozzle_high_flow = 0,0
+  nozzleHighFlow: boolean[];
+
+  // def = this->add("only_one_perimeter_first_layer", coBool);
+  // def->label = L("Only one perimeter on first layer");
+  // def->category = L("Layers and Perimeters");
+  // def->tooltip = L("Use only one perimeter on the first layer.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBool(false));
+  // ; only_one_perimeter_first_layer = 0
+  onlyOnePerimeterFirstLayer = false;
+
+  // def           = this->add("overhang_fan_speed_0", coInts);
+  // def->label    = L("speed for 0% overlap (bridge)");
+  // def->tooltip  = fan_speed_setting_description;
+  // def->sidetext = L("%");
+  // def->min      = 0;
+  // def->max      = 100;
+  // def->mode     = comExpert;
+  // def->set_default_value(new ConfigOptionInts{0});
+  // ; overhang_fan_speed_0 = 0,0
+  overHangFanSpeed0: number[];
+  // ; overhang_fan_speed_1 = 0,0
+  overHangFanSpeed1: number[];
+  // ; overhang_fan_speed_2 = 0,0
+  overHangFanSpeed2: number[];
+  // ; overhang_fan_speed_3 = 0,0
+  overHangFanSpeed3: number[];
+
+  // def             = this->add("overhang_speed_0", coFloatOrPercent);
+  // def->label      = L("speed for 0% overlap (bridge)");
+  // def->category   = L("Speed");
+  // def->tooltip    = overhang_speed_setting_description;
+  // def->sidetext   = L("mm/s or %");
+  // def->min        = 0;
+  // def->mode       = comExpert;
+  // def->set_default_value(new ConfigOptionFloatOrPercent(15, false));
+  // TODO: NOTE: mm/s
+  // ; overhang_speed_0 = 15
+  overHangSpeed0 = 15;
+  // ; overhang_speed_1 = 15
+  overHangSpeed1 = 15;
+  // ; overhang_speed_2 = 20
+  overHangSpeed2 = 20;
+  // ; overhang_speed_3 = 25
+  overHangSpeed3 = 25;
+
+  // def = this->add("prefer_clockwise_movements", coBool);
+  // def->label = L("Prefer clockwise movements");
+  // def->tooltip = L("This setting makes the printer print loops clockwise instead of counterclockwise.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBool(false));
+  // ; prefer_clockwise_movements = 0
+  preferClockwiseMovements = false;
+
+  // def = this->add("solid_infill_acceleration", coFloat);
+  // def->label = L("Solid infill");
+  // def->tooltip = L("This is the acceleration your printer will use for solid infill. Set zero to use "
+  //                  "the value for infill.");
+  // def->sidetext = L("mm/s²");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloat(0));
+  // ; solid_infill_acceleration = 0
+  solidInfillAcceleration = 0;
+
+  // def = this->add("staggered_inner_seams", coBool);
+  // def->label = L("Staggered inner seams");
+  // // TRN PrintSettings: "Staggered inner seams"
+  // def->tooltip = L("This option causes the inner seams to be shifted backwards based on their depth, forming a zigzag pattern.");
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionBool(false));
+  // ; staggered_inner_seams = 0
+  staggeredInnerSeams = false;
+
+  // def = this->add("support_tree_angle", coFloat);
+  // def->label = L("Maximum Branch Angle");
+  // def->category = L("Support material");
+  // // TRN PrintSettings: "Organic supports" > "Maximum Branch Angle"
+  // def->tooltip = L("The maximum angle of the branches, when the branches have to avoid the model. "
+  //                  "Use a lower angle to make them more vertical and more stable. Use a higher angle to be able to have more reach.");
+  // def->sidetext = L("°");
+  // def->min = 0;
+  // def->max = 85;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloat(40));
+  // ; support_tree_angle = 40
+  supportTreeAngle = 40;
+  // ; support_tree_angle_slow = 25
+  support_tree_angle_slow = 25;
+
+  // def = this->add("support_tree_branch_diameter", coFloat);
+  // def->label = L("Branch Diameter");
+  // def->category = L("Support material");
+  // // TRN PrintSettings: "Organic supports" > "Branch Diameter"
+  // def->tooltip = L("The diameter of the thinnest branches of organic support. Thicker branches are more sturdy. "
+  //                  "Branches towards the base will be thicker than this.");
+  // def->sidetext = L("mm");
+  // def->min = 0.1f;
+  // def->max = 100.f;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloat(2));
+  // ; support_tree_branch_diameter = 2
+  supportTreeBranchDiameter = 2;
+
+  // def = this->add("support_tree_branch_diameter_angle", coFloat);
+  // TRN PrintSettings: #lmFIXME
+  // def->label = L("Branch Diameter Angle");
+  // def->category = L("Support material");
+  // TRN PrintSettings: "Organic supports" > "Branch Diameter Angle"
+  // def->tooltip = L("The angle of the branches' diameter as they gradually become thicker towards the bottom. "
+  //                  "An angle of 0 will cause the branches to have uniform thickness over their length. "
+  //                  "A bit of an angle can increase stability of the organic support.");
+  // def->sidetext = L("°");
+  // def->min = 0;
+  // def->max = 15;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloat(5));
+  // ; support_tree_branch_diameter_angle = 5
+  supportTreeBranchDiameterAngle = 5;
+
+  // def = this->add("support_tree_branch_diameter_double_wall", coFloat);
+  // def->label = L("Branch Diameter with double walls");
+  // def->category = L("Support material");
+  // // TRN PrintSettings: "Organic supports" > "Branch Diameter"
+  // def->tooltip = L("Branches with area larger than the area of a circle of this diameter will be printed with double walls for stability. "
+  //                  "Set this value to zero for no double walls.");
+  // def->sidetext = L("mm");
+  // def->min = 0;
+  // def->max = 100.f;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloat(3));
+  // ; support_tree_branch_diameter_double_wall = 3
+  supportTreeBranchDiameterDoubleWall = 3;
+
+  // Tree Support Branch Distance
+  // How far apart the branches need to be when they touch the model. Making this distance small will cause
+  // the tree support to touch the model at more points, causing better overhang but making support harder to remove.
+  // def = this->add("support_tree_branch_distance", coFloat);
+  // // TRN PrintSettings: #lmFIXME
+  // def->label = L("Branch Distance");
+  // def->category = L("Support material");
+  // // TRN PrintSettings: "Organic supports" > "Branch Distance"
+  // def->tooltip = L("How far apart the branches need to be when they touch the model. "
+  //                  "Making this distance small will cause the tree support to touch the model at more points, "
+  //                  "causing better overhang but making support harder to remove.");
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloat(1.));
+  // ; support_tree_branch_distance = 1
+  supportTreeBranchDistance = 1;
+
+  // def = this->add("support_tree_tip_diameter", coFloat);
+  // def->label = L("Tip Diameter");
+  // def->category = L("Support material");
+  // // TRN PrintSettings: "Organic supports" > "Tip Diameter"
+  // def->tooltip = L("Branch tip diameter for organic supports.");
+  // def->sidetext = L("mm");
+  // def->min = 0.1f;
+  // def->max = 100.f;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloat(0.8));
+  // ; support_tree_tip_diameter = 0.8
+  supportTreeTipDiameter = 0.8;
+
+  // def = this->add("support_tree_top_rate", coPercent);
+  // def->label = L("Branch Density");
+  // def->category = L("Support material");
+  // TRN PrintSettings: "Organic supports" > "Branch Density"
+  // def->tooltip = L("Adjusts the density of the support structure used to generate the tips of the branches. "
+  //                  "A higher value results in better overhangs but the supports are harder to remove, "
+  //                  "thus it is recommended to enable top support interfaces instead of a high branch density value "
+  //                  "if dense interfaces are needed.");
+  // def->sidetext = L("%");
+  // def->min = 5;
+  // def->max_literal = 35;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionPercent(15));
+  // ; support_tree_top_rate = 15%
+  supportTreeTopRate = 15;
+
+  // def = this->add("top_one_perimeter_type", coEnum);
+  // def->label = L("Single perimeter on top surfaces");
+  // def->category = L("Layers and Perimeters");
+  // def->tooltip = L("Use only one perimeter on flat top surface, to give more space to the top infill pattern. Could be applied on topmost surface or all top surfaces.");
+  // def->mode = comExpert;
+  // def->set_enum<TopOnePerimeterType>({
+  //     { "none",    L("Disabled") },
+  //     { "top",     L("All top surfaces") },
+  //     { "topmost", L("Topmost surface only") }
+  // });
+  // def->set_default_value(new ConfigOptionEnum<TopOnePerimeterType>(TopOnePerimeterType::None));
+  // ; top_one_perimeter_type = none
+  topOnePerimeterType = TopOnePerimeterType.NONE;
+
+  // def = this->add("top_solid_infill_acceleration", coFloat);
+  // def->label = L("Top solid infill");
+  // def->tooltip = L("This is the acceleration your printer will use for top solid infill. Set zero to use "
+  //                  "the value for solid infill.");
+  // def->sidetext = L("mm/s²");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloat(0));
+  // ; top_solid_infill_acceleration = 0
+  topSolidInfillAcceleration = 0;
+
+  // def = this->add("travel_acceleration", coFloat);
+  // def->label = L("Travel");
+  // def->tooltip = L("This is the acceleration your printer will use for travel moves. Set zero to disable "
+  //                  "acceleration control for travel.");
+  // def->sidetext = L("mm/s²");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloat(0));
+  // ; travel_acceleration = 0
+  travelAcceleration = 0;
+
+  //   def = this->add("travel_lift_before_obstacle", coBools);
+  // def->label = L("Steeper ramp before obstacles");
+  // def->tooltip = L("If enabled, PrusaSlicer detects obstacles along the travel path and makes the slope steeper "
+  //                  "in case an obstacle might be hit during the initial phase of the travel.");
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionBools{false});
+  // ; travel_lift_before_obstacle = 0,0
+  travelLiftBeforeObstacle: boolean[];
+
+  // def = this->add("travel_max_lift", coFloats);
+  // def->label = L("Maximum ramping lift");
+  // def->tooltip = L("Maximum lift height of the ramping lift. It may not be reached if the next position "
+  //                  "is close to the old one.");
+  // def->sidetext = L("mm");
+  // def->min = 0;
+  // def->max_literal = 1000;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloats{0.0});
+  // ; travel_max_lift = 0,0
+  travelMaxLift: number[];
+
+  // def = this->add("travel_ramping_lift", coBools);
+  // def->label = L("Use ramping lift");
+  // def->tooltip = L("Generates a ramping lift instead of lifting the extruder directly upwards. "
+  //                  "The travel is split into two phases: the ramp and the standard horizontal travel. "
+  //                  "This option helps reduce stringing.");
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionBools{ false });
+  // ; travel_ramping_lift = 0,0
+  travelRampLift: boolean[];
+
+  // def = this->add("travel_slope", coFloats);
+  // def->label = L("Ramping slope angle");
+  // def->tooltip = L("Slope of the ramp in the initial phase of the travel.");
+  // def->sidetext = L("°");
+  // def->min = 0;
+  // def->max = 90;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionFloats{0.0});
+  // ; travel_slope = 0,0
+  travelSlope: number[];
+
+  // def = this->add("wipe_tower_acceleration", coFloat);
+  // def->label = L("Wipe tower");
+  // def->tooltip = L("This is the acceleration your printer will use for wipe tower. Set zero to disable "
+  //                  "acceleration control for the wipe tower.");
+  // def->sidetext = L("mm/s²");
+  // def->min = 0;
+  // def->mode = comExpert;
+  // def->set_default_value(new ConfigOptionFloat(0));
+  // ; wipe_tower_acceleration = 0
+  wipeTowerAcceleration = 0;
+
+  // def = this->add("wipe_tower_cone_angle", coFloat);
+  // def->label = L("Stabilization cone apex angle");
+  // def->tooltip = L("Angle at the apex of the cone that is used to stabilize the wipe tower. "
+  //                  "Larger angle means wider base.");
+  // def->sidetext = L("°");
+  // def->mode = comAdvanced;
+  // def->min = 0.;
+  // def->max = 90.;
+  // def->set_default_value(new ConfigOptionFloat(0.));
+  // ; wipe_tower_cone_angle = 0
+  wipeTowerConeAngle = 0;
+
+  // def = this->add("wipe_tower_extra_flow", coPercent);
+  // def->label = L("Extra flow for purging");
+  // def->tooltip = L("Extra flow used for the purging lines on the wipe tower. This makes the purging lines thicker or narrower "
+  //                  "than they normally would be. The spacing is adjusted automatically.");
+  // def->sidetext = L("%");
+  // def->mode = comExpert;
+  // def->min = 100.;
+  // def->max = 300.;
+  // def->set_default_value(new ConfigOptionPercent(100.));
+  // ; wipe_tower_extra_flow = 100%
+  wipeTowerExtraFlow = 100;
+
+  // def = this->add("wipe_tower_extra_spacing", coPercent);
+  // def->label = L("Wipe tower purge lines spacing");
+  // def->tooltip = L("Spacing of purge lines on the wipe tower.");
+  // def->sidetext = L("%");
+  // def->mode = comExpert;
+  // def->min = 100.;
+  // def->max = 300.;
+  // def->set_default_value(new ConfigOptionPercent(100.));
+  // ; wipe_tower_extra_spacing = 100%
+  wipeTowerExtraSpacing = 100;
+
+  // def = this->add("wipe_tower_extruder", coInt);
+  // def->label = L("Wipe tower extruder");
+  // def->category = L("Extruders");
+  // def->tooltip = L("The extruder to use when printing perimeter of the wipe tower. "
+  //                  "Set to 0 to use the one that is available (non-soluble would be preferred).");
+  // def->min = 0;
+  // def->mode = comAdvanced;
+  // def->set_default_value(new ConfigOptionInt(0));
+  // ; wipe_tower_extruder = 0
+  wipeTowerExtruder = 0;
+
+  // def = this->add("wiping_volumes_use_custom_matrix", coBool);
+  // def->label = "";
+  // def->tooltip = "";
+  // def->set_default_value(new ConfigOptionBool{ false });
+  // ; wiping_volumes_use_custom_matrix = 1
+  // TODO: 3mf file default is different from printConfig.ccp default
+  // TODO: verify what this does:
+  // if (config.has("wiping_volumes_matrix") && !config.has("wiping_volumes_use_custom_matrix")) {
+  // This is apparently some pre-2.7.3 config, where the wiping_volumes_matrix was always used.
+  // The 2.7.3 introduced an option to use defaults derived from config. In case the matrix
+  // contains only default values, switch it to default behaviour. The default values
+  // were zeros on the diagonal and 140 otherwise.
+  //       std::vector<double> matrix = config.opt<ConfigOptionFloats>("wiping_volumes_matrix")->values;
+  //       int num_of_extruders = int(std::sqrt(matrix.size()) + 0.5);
+  //       int i = -1;
+  //       bool custom = false;
+  //       for (int j = 0; j < int(matrix.size()); ++j) {
+  //           if (j % num_of_extruders == 0)
+  //               ++i;
+  //           if (i != j % num_of_extruders && !is_approx(matrix[j], 140.)) {
+  //               custom = true;
+  //               break;
+  //           }
+  //       }
+  //       config.set_key_value("wiping_volumes_use_custom_matrix", new ConfigOptionBool(custom));
+  //   }
+  wipingVolumesUseCustomMatrix = false;
+
   // not used by PrusaSlicer
   clearBufferCommand = 'G4 P0';
   coolingModuleSpeed: number[];
@@ -314,6 +963,7 @@ export default class Profile {
   towerSpeed: number[];
   firstLayerTowerSpeed: number[];
   towerExtrusionWidth = 0.45;
+  // TODO - replace 
   chamberTemperature = 0;
   layerGcodePrinterscript = '';
   endGcodePrinterscript = '';
@@ -404,6 +1054,36 @@ export default class Profile {
     this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
     this.coolingModuleSpeed = new Array(extruderCount).fill(100);
     this.zOffsetPerExt = new Array(extruderCount).fill(0);
+    this.chamberMinimalTemperatureActual = new Array(extruderCount).fill(0);
+    this.chamberTemperatureActual = new Array(extruderCount).fill(0);
+    this.enableDynamicFanSpeed = new Array(extruderCount).fill(false);
+    this.filamentAbrasive = new Array(extruderCount).fill(false);
+    this.filamentInfillMaxCrossingSpeed = new Array(extruderCount).fill(0);
+    this.filamentInfillMaxSpeed = new Array(extruderCount).fill(0);
+    this.filamentMultiToolRamming = new Array(extruderCount).fill(false);
+    this.filamentMultiToolRammingFlow = new Array(extruderCount).fill(10);
+    this.filamentMultiToolRammingVolume = new Array(extruderCount).fill(10);
+    this.filamentPurgeMultiplier = new Array(extruderCount).fill(100);
+    this.filamentRetractLengthToolChange = new Array(extruderCount).fill('nil');
+    this.filamentRetractRestartExtraToolChange = new Array(extruderCount).fill('nil');
+    this.filamentShrinkageCompensationXY = new Array(extruderCount).fill(0);
+    this.filamentShrinkageCompensationZ = new Array(extruderCount).fill(0);
+    this.filamentStampingDistance = new Array(extruderCount).fill(0);
+    this.filamentStampingLoadingSpeed = new Array(extruderCount).fill(20);
+    this.filamentTravelLiftBeforeObstacle = new Array(extruderCount).fill('nil');
+    this.filamentTravelMaxLift = new Array(extruderCount).fill('nil');
+    this.filamentTravelRampLift = new Array(extruderCount).fill('nil');
+    this.filamentTravelSlope = new Array(extruderCount).fill('nil');
+    this.idleTemperature = new Array(extruderCount).fill('nil');
+    this.nozzleHighFlow = new Array(extruderCount).fill(false);
+    this.overHangFanSpeed0 = new Array(extruderCount).fill(0);
+    this.overHangFanSpeed1 = new Array(extruderCount).fill(0);
+    this.overHangFanSpeed2 = new Array(extruderCount).fill(0);
+    this.overHangFanSpeed3 = new Array(extruderCount).fill(0);
+    this.travelLiftBeforeObstacle = new Array(extruderCount).fill(false);
+    this.travelMaxLift = new Array(extruderCount).fill(0);
+    this.travelRampLift = new Array(extruderCount).fill(false);
+    this.travelSlope = new Array(extruderCount).fill(0);
   }
 
   getBedShapeString() {
@@ -546,7 +1226,7 @@ export default class Profile {
 ; gap_fill_speed = ${this.gapFillSpeed}
 ; gcode_comments = ${boolToIntString(this.gcodeComments)}
 ; gcode_flavor = ${this.gcodeFlavor}
-; gcode_label_objects = ${boolToIntString(this.gcodeLabelObjects)}
+; gcode_label_objects = ${this.gcodeLabelObjects}
 ; gcode_resolution = ${this.gcodeResolution}
 ; gcode_substitutions = ${this.gcodeSubstitutions}
 ; high_current_on_filament_swap = ${boolToIntString(this.highCurrentOnFilamentSwap)}

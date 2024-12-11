@@ -98,3 +98,41 @@ export enum PerimeterGenerator {
   CLASSIC = 'classic',
   ARACHNE = 'arachne',
 }
+
+// def->set_enum<LabelObjectsStyle>({
+//     { "disabled",   L("Disabled") },
+//     { "octoprint",  L("OctoPrint comments") },
+//     { "firmware",   L("Firmware-specific") }
+//     });
+export enum GcodeLabelObjects {
+  DISABLED = 'disabled',
+  OCTOPRINT = 'octoprint', // OctoPrint comments
+  FIRMWARE = 'firmware', // Firmware-specific
+}
+
+// def = this->add("arc_fitting", coEnum);
+// def->label = L("Arc fitting");
+// def->tooltip = L("Enable to get a G-code file which has G2 and G3 moves. "
+//                  "G-code resolution will be used as the fitting tolerance.");
+// def->set_enum<ArcFittingType>({
+//     { "disabled",       "Disabled" },
+//     { "emit_center",    "Enabled: G2/3 I J" }
+// });
+// def->mode = comAdvanced;
+// def->set_default_value(new ConfigOptionEnum<ArcFittingType>(ArcFittingType::Disabled));
+
+export enum ArcFitting {
+  DISABLED = 'disabled',
+  EMIT_CENTER = 'emit_center', //Enabled: G2/3 I J
+}
+
+// def->set_enum<TopOnePerimeterType>({
+//   { "none",    L("Disabled") },
+//   { "top",     L("All top surfaces") },
+//   { "topmost", L("Topmost surface only") }
+// });
+export enum TopOnePerimeterType {
+  NONE = 'none', //Disabled
+  TOP = 'top', // All top surfaces
+  TOPMOST = 'topmost', // Topmost surface only
+}
