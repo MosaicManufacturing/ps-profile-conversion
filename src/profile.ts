@@ -385,7 +385,7 @@ export default class Profile {
   // def->mode = comExpert;
   // def->set_default_value(new ConfigOptionInts{ 0 });
   // ; chamber_minimal_temperature = 0,0
-  chamberMinimalTemperatureActual: number[];
+  chamberMinimalTemperature: number[];
 
   // def = this->add("chamber_temperature", coInts);
   // // TRN: Label of a configuration parameter: Nominal chamber temperature.
@@ -399,7 +399,7 @@ export default class Profile {
   // def->mode = comExpert;
   // def->set_default_value(new ConfigOptionInts{ 0 });
   // ; chamber_temperature = 0,0`
-  chamberTemperatureActual: number[];
+  chamberTemperature: number[];
 
   // def          = this->add("enable_dynamic_fan_speeds", coBools);
   // def->label   = L("Enable dynamic fan speeds");
@@ -407,7 +407,7 @@ export default class Profile {
   // def->mode    = comExpert;
   // def->set_default_value(new ConfigOptionBools{false});
   // ; enable_dynamic_fan_speeds = 0,0
-  enableDynamicFanSpeed: boolean[];
+  enableDynamicFanSpeeds: boolean[];
 
   // def             = this->add("enable_dynamic_overhang_speeds", coBool);
   // def->label      = L("Enable dynamic overhang speeds");
@@ -416,7 +416,7 @@ export default class Profile {
   // def->mode       = comExpert;
   // def->set_default_value(new ConfigOptionBool(false));
   // ; enable_dynamic_overhang_speeds = 0
-  enableDynamicOverhangSpeed = false;
+  enableDynamicOverhangSpeeds = false;
 
   //  def = this->add("external_perimeter_acceleration", coFloat);
   //   def->label = L("External perimeters");
@@ -436,7 +436,7 @@ export default class Profile {
   // def->mode = comExpert;
   // def->set_default_value(new ConfigOptionBool(false));
   // ; extra_perimeters_on_overhangs = 0
-  extraPerimetersOnOverhang = false;
+  extraPerimetersOnOverhangs = false;
 
   // def = this->add("filament_abrasive", coBools);
   // def->label = L("Abrasive material");
@@ -570,7 +570,7 @@ export default class Profile {
   // ; filament_travel_max_lift = nil,nil
   filamentTravelMaxLift: Nil[];
   // ; filament_travel_ramping_lift = nil,nil
-  filamentTravelRampLift: Nil[];
+  filamentTravelRampingLift: Nil[];
   // ; filament_travel_slope = nil,nil
   filamentTravelSlope: Nil[];
 
@@ -583,7 +583,7 @@ export default class Profile {
   // def->max = max_temp;
   // def->set_default_value(new ConfigOptionIntsNullable { ConfigOptionIntsNullable::nil_value() });
   // ; idle_temperature = nil,nil
-  idleTemperature: number | Nil[];
+  idleTemperature: (number | Nil)[];
 
   // def = this->add("mmu_segmented_region_interlocking_depth", coFloat);
   // def->label = L("Interlocking depth of a segmented region");
@@ -702,7 +702,7 @@ export default class Profile {
   // ; support_tree_angle = 40
   supportTreeAngle = 40;
   // ; support_tree_angle_slow = 25
-  support_tree_angle_slow = 25;
+  supportTreeAngleSlow = 25;
 
   // def = this->add("support_tree_branch_diameter", coFloat);
   // def->label = L("Branch Diameter");
@@ -858,7 +858,7 @@ export default class Profile {
   // def->mode = comAdvanced;
   // def->set_default_value(new ConfigOptionBools{ false });
   // ; travel_ramping_lift = 0,0
-  travelRampLift: boolean[];
+  travelRampingLift: boolean[];
 
   // def = this->add("travel_slope", coFloats);
   // def->label = L("Ramping slope angle");
@@ -963,8 +963,6 @@ export default class Profile {
   towerSpeed: number[];
   firstLayerTowerSpeed: number[];
   towerExtrusionWidth = 0.45;
-  // TODO - replace 
-  chamberTemperature = 0;
   layerGcodePrinterscript = '';
   endGcodePrinterscript = '';
   startFilamentGcodePrinterscript: string[];
@@ -978,15 +976,21 @@ export default class Profile {
     this.bedTemperature = new Array(extruderCount).fill(0);
     this.bottomFillPattern = SolidFillPattern.MONOTONIC;
     this.bridgeFanSpeed = new Array(extruderCount).fill(100);
+    this.chamberMinimalTemperature = new Array(extruderCount).fill(0);
+    this.chamberTemperature = new Array(extruderCount).fill(0);
     this.cooling = new Array(extruderCount).fill(true);
+    this.coolingModuleSpeed = new Array(extruderCount).fill(100);
     this.deretractSpeed = new Array(extruderCount).fill(0);
     this.disableFanFirstLayers = new Array(extruderCount).fill(1);
+    this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
+    this.enableDynamicFanSpeeds = new Array(extruderCount).fill(false);
     this.endFilamentGcode = new Array(extruderCount).fill('');
     this.extruderColor = new Array(extruderCount).fill('#000000');
     this.extruderOffset = new Array(extruderCount).fill(0).map(() => [0, 0]);
     this.extrusionMultiplier = new Array(extruderCount).fill(1);
     this.fanAlwaysOn = new Array(extruderCount).fill(true);
     this.fanBelowLayerTime = new Array(extruderCount).fill(100);
+    this.filamentAbrasive = new Array(extruderCount).fill(false);
     this.filamentColor = new Array(extruderCount).fill('#000000');
     this.filamentCoolingFinalSpeed = new Array(extruderCount).fill(0);
     this.filamentCoolingInitialSpeed = new Array(extruderCount).fill(0);
@@ -995,40 +999,63 @@ export default class Profile {
     this.filamentDensity = new Array(extruderCount).fill(1.25);
     this.filamentDeretractSpeed = new Array(extruderCount).fill('nil');
     this.filamentDiameter = new Array(extruderCount).fill(1.75);
-    this.filamentLoadTime = new Array(extruderCount).fill(0);
+    this.filamentInfillMaxCrossingSpeed = new Array(extruderCount).fill(0);
+    this.filamentInfillMaxSpeed = new Array(extruderCount).fill(0);
     this.filamentLoadingSpeed = new Array(extruderCount).fill(28);
     this.filamentLoadingSpeedStart = new Array(extruderCount).fill(0);
+    this.filamentLoadTime = new Array(extruderCount).fill(0);
     this.filamentMaxVolumetricSpeed = new Array(extruderCount).fill(0);
     this.filamentMinimalPurgeOnWipeTower = new Array(extruderCount).fill(0);
+    this.filamentMultiToolRamming = new Array(extruderCount).fill(false);
+    this.filamentMultiToolRammingFlow = new Array(extruderCount).fill(10);
+    this.filamentMultiToolRammingVolume = new Array(extruderCount).fill(10);
     this.filamentNotes = new Array(extruderCount).fill('');
+    this.filamentPurgeMultiplier = new Array(extruderCount).fill(100);
     this.filamentRammingParameters = new Array(extruderCount).fill('');
     this.filamentRetractBeforeTravel = new Array(extruderCount).fill('nil');
     this.filamentRetractBeforeWipe = new Array(extruderCount).fill('nil');
     this.filamentRetractLayerChange = new Array(extruderCount).fill('nil');
     this.filamentRetractLength = new Array(extruderCount).fill('nil');
+    this.filamentRetractLengthToolChange = new Array(extruderCount).fill('nil');
     this.filamentRetractLift = new Array(extruderCount).fill('nil');
     this.filamentRetractLiftAbove = new Array(extruderCount).fill('nil');
     this.filamentRetractLiftBelow = new Array(extruderCount).fill('nil');
     this.filamentRetractRestartExtra = new Array(extruderCount).fill('nil');
+    this.filamentRetractRestartExtraToolChange = new Array(extruderCount).fill('nil');
     this.filamentRetractSpeed = new Array(extruderCount).fill('nil');
     this.filamentSettingsId = new Array(extruderCount).fill(`${SETTINGS_ID} (Filament)`);
+    this.filamentShrinkageCompensationXY = new Array(extruderCount).fill(0);
+    this.filamentShrinkageCompensationZ = new Array(extruderCount).fill(0);
     this.filamentSoluble = new Array(extruderCount).fill(false);
     this.filamentSpoolWeight = new Array(extruderCount).fill(0);
+    this.filamentStampingDistance = new Array(extruderCount).fill(0);
+    this.filamentStampingLoadingSpeed = new Array(extruderCount).fill(20);
     this.filamentToolchangeDelay = new Array(extruderCount).fill(0);
+    this.filamentTravelLiftBeforeObstacle = new Array(extruderCount).fill('nil');
+    this.filamentTravelMaxLift = new Array(extruderCount).fill('nil');
+    this.filamentTravelRampingLift = new Array(extruderCount).fill('nil');
+    this.filamentTravelSlope = new Array(extruderCount).fill('nil');
     this.filamentType = new Array(extruderCount).fill('PLA');
-    this.filamentUnloadTime = new Array(extruderCount).fill(0);
     this.filamentUnloadingSpeed = new Array(extruderCount).fill(0);
     this.filamentUnloadingSpeedStart = new Array(extruderCount).fill(0);
+    this.filamentUnloadTime = new Array(extruderCount).fill(0);
     this.filamentWipe = new Array(extruderCount).fill('nil');
     this.firstLayerBedTemperature = new Array(extruderCount).fill(0);
     this.firstLayerTemperature = new Array(extruderCount).fill(215);
+    this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
     this.fullFanSpeedLayer = new Array(extruderCount).fill(4);
+    this.idleTemperature = new Array(extruderCount).fill('nil');
     this.maxFanSpeed = new Array(extruderCount).fill(100);
     this.maxLayerHeight = new Array(extruderCount).fill(0.25);
     this.minFanSpeed = new Array(extruderCount).fill(100);
     this.minLayerHeight = new Array(extruderCount).fill(0.07);
     this.minPrintSpeed = new Array(extruderCount).fill(15);
     this.nozzleDiameter = new Array(extruderCount).fill(0.4);
+    this.nozzleHighFlow = new Array(extruderCount).fill(false);
+    this.overHangFanSpeed0 = new Array(extruderCount).fill(0);
+    this.overHangFanSpeed1 = new Array(extruderCount).fill(0);
+    this.overHangFanSpeed2 = new Array(extruderCount).fill(0);
+    this.overHangFanSpeed3 = new Array(extruderCount).fill(0);
     this.retractBeforeTravel = new Array(extruderCount).fill(2);
     this.retractBeforeWipe = new Array(extruderCount).fill(0);
     this.retractLayerChange = new Array(extruderCount).fill(true);
@@ -1042,48 +1069,19 @@ export default class Profile {
     this.retractSpeed = new Array(extruderCount).fill(35);
     this.slowdownBelowLayerTime = new Array(extruderCount).fill(15);
     this.startFilamentGcode = new Array(extruderCount).fill('');
+    this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
     this.temperature = new Array(extruderCount).fill(205);
+    this.towerSpeed = new Array(extruderCount).fill(0);
+    this.travelLiftBeforeObstacle = new Array(extruderCount).fill(false);
+    this.travelMaxLift = new Array(extruderCount).fill(0);
+    this.travelRampingLift = new Array(extruderCount).fill(false);
+    this.travelSlope = new Array(extruderCount).fill(0);
     this.wipe = new Array(extruderCount).fill(false);
     this.wipingVolumesExtruders = new Array(extruderCount).fill(0).map(() => [70, 70]);
     this.wipingVolumesMatrix = new Array(extruderCount)
       .fill(0)
       .map((_, i) => new Array(extruderCount).fill(0).map((__, j) => (i === j ? 0 : 140)));
-    this.towerSpeed = new Array(extruderCount).fill(0);
-    this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
-    this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
-    this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
-    this.coolingModuleSpeed = new Array(extruderCount).fill(100);
     this.zOffsetPerExt = new Array(extruderCount).fill(0);
-    this.chamberMinimalTemperatureActual = new Array(extruderCount).fill(0);
-    this.chamberTemperatureActual = new Array(extruderCount).fill(0);
-    this.enableDynamicFanSpeed = new Array(extruderCount).fill(false);
-    this.filamentAbrasive = new Array(extruderCount).fill(false);
-    this.filamentInfillMaxCrossingSpeed = new Array(extruderCount).fill(0);
-    this.filamentInfillMaxSpeed = new Array(extruderCount).fill(0);
-    this.filamentMultiToolRamming = new Array(extruderCount).fill(false);
-    this.filamentMultiToolRammingFlow = new Array(extruderCount).fill(10);
-    this.filamentMultiToolRammingVolume = new Array(extruderCount).fill(10);
-    this.filamentPurgeMultiplier = new Array(extruderCount).fill(100);
-    this.filamentRetractLengthToolChange = new Array(extruderCount).fill('nil');
-    this.filamentRetractRestartExtraToolChange = new Array(extruderCount).fill('nil');
-    this.filamentShrinkageCompensationXY = new Array(extruderCount).fill(0);
-    this.filamentShrinkageCompensationZ = new Array(extruderCount).fill(0);
-    this.filamentStampingDistance = new Array(extruderCount).fill(0);
-    this.filamentStampingLoadingSpeed = new Array(extruderCount).fill(20);
-    this.filamentTravelLiftBeforeObstacle = new Array(extruderCount).fill('nil');
-    this.filamentTravelMaxLift = new Array(extruderCount).fill('nil');
-    this.filamentTravelRampLift = new Array(extruderCount).fill('nil');
-    this.filamentTravelSlope = new Array(extruderCount).fill('nil');
-    this.idleTemperature = new Array(extruderCount).fill('nil');
-    this.nozzleHighFlow = new Array(extruderCount).fill(false);
-    this.overHangFanSpeed0 = new Array(extruderCount).fill(0);
-    this.overHangFanSpeed1 = new Array(extruderCount).fill(0);
-    this.overHangFanSpeed2 = new Array(extruderCount).fill(0);
-    this.overHangFanSpeed3 = new Array(extruderCount).fill(0);
-    this.travelLiftBeforeObstacle = new Array(extruderCount).fill(false);
-    this.travelMaxLift = new Array(extruderCount).fill(0);
-    this.travelRampLift = new Array(extruderCount).fill(false);
-    this.travelSlope = new Array(extruderCount).fill(0);
   }
 
   getBedShapeString() {
@@ -1121,6 +1119,9 @@ export default class Profile {
     const s = `0${now.getUTCSeconds()}`.slice(-2);
     return `; generated by Canvas on ${Y}-${M}-${D} at ${h}:${m}:${s} UTC
 
+; arc_fitting = ${this.arcFitting}
+; autoemit_temperature_commands =  ${boolToIntString(this.autoEmitTemperatureCommands)}
+; avoid_crossing_curled_overhangs = ${boolToIntString(this.avoidCrossingCurledOverhangs)}
 ; avoid_crossing_perimeters = ${boolToIntString(this.avoidCrossingPerimeters)}
 ; avoid_crossing_perimeters_max_detour = ${this.avoidCrossingPerimetersMaxDetour}
 ; bed_custom_model = ${this.bedCustomModel}
@@ -1129,6 +1130,7 @@ export default class Profile {
 ; bed_temperature = ${this.bedTemperature.join(',')}
 ; before_layer_gcode = ${this.beforeLayerGcode || ';'}
 ; between_objects_gcode = ${this.betweenObjectsGcode || ';'}
+; binary_gcode = ${boolToIntString(this.binarygcode)}
 ; bottom_fill_pattern = ${this.bottomFillPattern}
 ; bottom_solid_layers = ${this.bottomSolidLayers}
 ; bottom_solid_min_thickness = ${this.bottomSolidMinThickness}
@@ -1140,6 +1142,8 @@ export default class Profile {
 ; brim_separation = ${this.brimSeparation}
 ; brim_type = ${this.brimType}
 ; brim_width = ${this.brimWidth}
+; chamber_minimal_temperature = ${this.chamberMinimalTemperature.join(',')}
+; chamber_temperature = ${this.chamberTemperature.join(',')}
 ; clip_multipart_objects = ${boolToIntString(this.clipMultipartObjects)}
 ; color_change_gcode = ${this.colorChangeGcode || ';'}
 ; colorprint_heights = ${this.colorPrintHeights.join(',')}
@@ -1156,14 +1160,18 @@ export default class Profile {
 ; draft_shield = ${this.draftShield}
 ; duplicate_distance = ${this.duplicateDistance}
 ; elefant_foot_compensation = ${this.elephantFootCompensation}
+; enable_dynamic_fan_speeds = ${this.enableDynamicFanSpeeds.map(boolToIntString).join(',')}
+; enable_dynamic_overhang_speeds = ${this.enableDynamicOverhangSpeeds}
 ; end_filament_gcode = ${this.endFilamentGcode.map((gcode) => (gcode ? `"${gcode}"` : '";"')).join(';')}
 ; end_gcode = ${this.endGcode || ';'}
 ; ensure_vertical_shell_thickness = ${boolToIntString(this.ensureVerticalShellThickness)}
+; external_perimeter_acceleration = ${this.externalPerimeterAcceleration}
 ; external_perimeter_extrusion_width = ${this.externalPerimeterExtrusionWidth}
 ; external_perimeter_speed = ${this.externalPerimeterSpeed}
 ; external_perimeters_first = ${boolToIntString(this.externalPerimetersFirst)}
 ; extra_loading_move = ${this.extraLoadingMove}
 ; extra_perimeters = ${boolToIntString(this.extraPerimeters)}
+; extra_perimeters_on_overhangs = ${this.extraPerimetersOnOverhangs}
 ; extruder_clearance_height = ${this.extruderClearanceHeight}
 ; extruder_clearance_radius = ${this.extruderClearanceRadius}
 ; extruder_colour = ${this.extruderColor.join(';')}
@@ -1173,6 +1181,7 @@ export default class Profile {
 ; extrusion_width = ${this.extrusionWidth}
 ; fan_always_on = ${this.fanAlwaysOn.map(boolToIntString).join(',')}
 ; fan_below_layer_time = ${this.fanBelowLayerTime.join(',')}
+; filament_abrasive = ${this.filamentAbrasive.map(boolToIntString).join(',')}
 ; filament_colour = ${this.filamentColor.join(';')}
 ; filament_cooling_final_speed = ${this.filamentCoolingFinalSpeed.join(',')}
 ; filament_cooling_initial_speed = ${this.filamentCoolingInitialSpeed.join(',')}
@@ -1181,26 +1190,42 @@ export default class Profile {
 ; filament_density = ${this.filamentDensity.join(',')}
 ; filament_deretract_speed = ${this.filamentDeretractSpeed.join(',')}
 ; filament_diameter = ${this.filamentDiameter.join(',')}
+; filament_infill_max_crossing_speed = ${this.filamentInfillMaxCrossingSpeed.join(',')}
+; filament_infill_max_speed = ${this.filamentInfillMaxSpeed.join(',')}
 ; filament_load_time = ${this.filamentLoadTime.join(',')}
 ; filament_loading_speed = ${this.filamentLoadingSpeed.join(',')}
 ; filament_loading_speed_start = ${this.filamentLoadingSpeedStart.join(',')}
 ; filament_max_volumetric_speed = ${this.filamentMaxVolumetricSpeed.join(',')}
 ; filament_minimal_purge_on_wipe_tower = ${this.filamentMinimalPurgeOnWipeTower.join(',')}
+; filament_multitool_ramming = ${this.filamentMultiToolRamming.map(boolToIntString).join(',')}
+; filament_multitool_ramming_flow = ${this.filamentMultiToolRammingFlow.join(',')}
+; filament_multitool_ramming_volume = ${this.filamentMultiToolRammingVolume.join(',')}
 ; filament_notes = ${this.filamentNotes.map((notes) => `"${notes}"`).join(';')}
+; filament_purge_multiplier = ${this.filamentPurgeMultiplier.join(',')}
 ; filament_ramming_parameters = ${this.filamentRammingParameters.map((params) => `"${params}"`).join(';')}
 ; filament_retract_before_travel = ${this.filamentRetractBeforeTravel.join(',')}
 ; filament_retract_before_wipe = ${this.filamentRetractBeforeWipe.join(',')}
 ; filament_retract_layer_change = ${this.filamentRetractLayerChange.join(',')}
 ; filament_retract_length = ${this.filamentRetractLength.join(',')}
+; filament_retract_length_toolchange = ${this.filamentRetractLengthToolChange.join(',')}
 ; filament_retract_lift = ${this.filamentRetractLift.join(',')}
 ; filament_retract_lift_above = ${this.filamentRetractLiftAbove.join(',')}
 ; filament_retract_lift_below = ${this.filamentRetractLiftBelow.join(',')}
 ; filament_retract_restart_extra = ${this.filamentRetractRestartExtra.join(',')}
+; filament_retract_restart_extra_toolchange = ${this.filamentRetractRestartExtraToolChange.join(',')}
 ; filament_retract_speed = ${this.filamentRetractSpeed.join(',')}
 ; filament_settings_id = ${this.filamentSettingsId.map((val) => `"${val}"`).join(';')}
+; filament_shrinkage_compensation_xy = ${this.filamentShrinkageCompensationXY.join(',')}
+; filament_shrinkage_compensation_z = ${this.filamentShrinkageCompensationZ.join(',')}
 ; filament_soluble = ${this.filamentSoluble.map(boolToIntString).join(',')}
 ; filament_spool_weight = ${this.filamentSpoolWeight.join(',')}
+; filament_stamping_distance = ${this.filamentStampingDistance.join(',')}
+; filament_stamping_loading_speed = ${this.filamentStampingDistance.join(',')}
 ; filament_toolchange_delay = ${this.filamentToolchangeDelay.join(',')}
+; filament_travel_lift_before_obstacle = ${this.filamentTravelLiftBeforeObstacle.join(',')}
+; filament_travel_max_lift = ${this.filamentTravelMaxLift.join(',')}
+; filament_travel_ramping_lift = ${this.filamentTravelRampingLift.join(',')}
+; filament_travel_slope = ${this.filamentTravelSlope.join(',')}
 ; filament_type = ${this.filamentType.join(';')}
 ; filament_unload_time = ${this.filamentUnloadTime.join(',')}
 ; filament_unloading_speed = ${this.filamentUnloadingSpeed.join(',')}
@@ -1231,6 +1256,7 @@ export default class Profile {
 ; gcode_substitutions = ${this.gcodeSubstitutions}
 ; high_current_on_filament_swap = ${boolToIntString(this.highCurrentOnFilamentSwap)}
 ; host_type = ${this.hostType}
+; idle_temperature = ${this.idleTemperature.join(',')}
 ; infill_acceleration = ${this.infillAcceleration}
 ; infill_anchor = ${this.infillAnchor}
 ; infill_anchor_max = ${this.infillAnchorMax}
@@ -1280,12 +1306,24 @@ export default class Profile {
 ; min_layer_height = ${this.minLayerHeight.join(',')}
 ; min_print_speed = ${this.minPrintSpeed.join(',')}
 ; min_skirt_length = ${this.minSkirtLength}
+; mmu_segmented_region_interlocking_depth = ${this.mmuSegmentedRegionInterlockingDepth}
 ; mmu_segmented_region_max_width = ${this.mmuSegmentedRegionMaxWidth}
+; multimaterial_purging = ${this.multiMaterialPurging}
 ; notes = ${this.notes}
 ; nozzle_diameter = ${this.nozzleDiameter.join(',')}
+; nozzle_high_flow = ${this.nozzleHighFlow.map(boolToIntString).join(',')}
+; only_one_perimeter_first_layer = ${boolToIntString(this.onlyOnePerimeterFirstLayer)}
 ; only_retract_when_crossing_perimeters = ${boolToIntString(this.onlyRetractWhenCrossingPerimeters)}
 ; ooze_prevention = ${boolToIntString(this.oozePrevention)}
 ; output_filename_format = ${this.outputFilenameFormat}
+; overhang_fan_speed_0 = ${this.overHangFanSpeed0.join(',')}
+; overhang_fan_speed_1 = ${this.overHangFanSpeed1.join(',')} 
+; overhang_fan_speed_2 = ${this.overHangFanSpeed2.join(',')} 
+; overhang_fan_speed_3 = ${this.overHangFanSpeed3.join(',')} 
+; overhang_speed_0 = ${this.overHangSpeed0}
+; overhang_speed_1 = ${this.overHangSpeed1}
+; overhang_speed_2 = ${this.overHangSpeed2}
+; overhang_speed_3 = ${this.overHangSpeed3}
 ; overhangs = ${boolToIntString(this.overhangs)}
 ; parking_pos_retraction = ${this.parkingPosRetraction}
 ; pause_print_gcode = ${this.pausePrintGcode || ';'}
@@ -1297,6 +1335,7 @@ export default class Profile {
 ; perimeters = ${this.perimeters}
 ; physical_printer_settings_id = ${this.physicalPrinterSettingsId}
 ; post_process = ${this.postProcess}
+; prefer_clockwise_movements = ${boolToIntString(this.preferClockwiseMovements)}
 ; print_settings_id = ${this.printSettingsId}
 ; printer_model = ${this.printerModel}
 ; printer_notes = ${this.printerNotes}
@@ -1333,12 +1372,14 @@ export default class Profile {
 ; slicing_mode = ${this.slicingMode}
 ; slowdown_below_layer_time = ${this.slowdownBelowLayerTime.join(',')}
 ; small_perimeter_speed = ${this.smallPerimeterSpeed}
+; solid_infill_acceleration = ${this.solidInfillAcceleration}
 ; solid_infill_below_area = ${this.solidInfillBelowArea}
 ; solid_infill_every_layers = ${this.solidInfillEveryLayers}
 ; solid_infill_extruder = ${this.solidInfillExtruder}
 ; solid_infill_extrusion_width = ${this.solidInfillExtrusionWidth}
 ; solid_infill_speed = ${this.solidInfillSpeed}
 ; spiral_vase = ${boolToIntString(this.spiralVase)}
+; staggered_inner_seams = ${boolToIntString(this.staggeredInnerSeams)}
 ; standby_temperature_delta = ${this.standbyTemperatureDelta}
 ; start_filament_gcode = ${this.startFilamentGcode.map((gcode) => (gcode ? `"${gcode}"` : '";"')).join(';')}
 ; start_gcode = ${this.startGcode || ';'}
@@ -1367,6 +1408,14 @@ export default class Profile {
 ; support_material_threshold = ${this.supportMaterialThreshold}
 ; support_material_with_sheath = ${boolToIntString(this.supportMaterialWithSheath)}
 ; support_material_xy_spacing = ${this.supportMaterialXYSpacing}
+; support_tree_angle = ${this.supportTreeAngle}
+; support_tree_angle_slow = ${this.supportTreeAngleSlow}
+; support_tree_branch_diameter = ${this.supportTreeBranchDiameter}
+; support_tree_branch_diameter_angle = ${this.supportTreeBranchDiameterAngle}
+; support_tree_branch_diameter_double_wall = ${this.supportTreeBranchDiameterDoubleWall}
+; support_tree_branch_distance = ${this.supportTreeBranchDistance}
+; support_tree_tip_diameter = ${this.supportTreeTipDiameter}
+; support_tree_top_rate = ${this.supportTreeTopRate}
 ; temperature = ${this.temperature.join(',')}
 ; template_custom_gcode = ${this.templateCustomGcode || ';'}
 ; thick_bridges = ${boolToIntString(this.thickBridges)}
@@ -1377,9 +1426,16 @@ export default class Profile {
 ; toolchange_gcode = ${this.toolchangeGcode || ';'}
 ; top_fill_pattern = ${this.topFillPattern}
 ; top_infill_extrusion_width = ${this.topInfillExtrusionWidth}
+; top_one_perimeter_type = ${this.topOnePerimeterType}
+; top_solid_infill_acceleration = ${this.topSolidInfillAcceleration}
 ; top_solid_infill_speed = ${this.topSolidInfillSpeed}
 ; top_solid_layers = ${this.topSolidLayers}
 ; top_solid_min_thickness = ${this.topSolidMinThickness}
+; travel_acceleration = ${this.travelAcceleration}
+; travel_lift_before_obstacle = ${this.travelLiftBeforeObstacle.map(boolToIntString).join(',')}
+; travel_max_lift = ${this.travelMaxLift.join(',')}
+; travel_ramping_lift = ${this.travelRampingLift.map(boolToIntString).join(',')}
+; travel_slope = ${this.travelSlope.join(',')}
 ; travel_speed = ${this.travelSpeed}
 ; travel_speed_z = ${this.travelSpeedZ}
 ; use_firmware_retraction = ${boolToIntString(this.useFirmwareRetraction)}
@@ -1394,8 +1450,13 @@ export default class Profile {
 ; wipe_into_infill = ${boolToIntString(this.wipeIntoInfill)}
 ; wipe_into_objects = ${boolToIntString(this.wipeIntoObjects)}
 ; wipe_tower = ${boolToIntString(this.wipeTower)}
+; wipe_tower_acceleration = ${this.wipeTowerAcceleration}
 ; wipe_tower_bridging = ${this.wipeTowerBridging}
 ; wipe_tower_brim_width = ${this.wipeTowerBrimWidth}
+; wipe_tower_cone_angle = ${this.wipeTowerConeAngle}
+; wipe_tower_extra_flow = ${this.wipeTowerExtraFlow}
+; wipe_tower_extra_spacing = ${this.wipeTowerExtraSpacing}
+; wipe_tower_extruder = ${this.wipeTowerExtruder}
 ; wipe_tower_no_sparse_layers = ${boolToIntString(this.wipeTowerNoSparseLayers)}
 ; wipe_tower_rotation_angle = ${this.wipeTowerRotationAngle}
 ; wipe_tower_width = ${this.wipeTowerWidth}
@@ -1403,6 +1464,7 @@ export default class Profile {
 ; wipe_tower_y = ${this.wipeTowerY}
 ; wiping_volumes_extruders = ${this.wipingVolumesExtruders.map((vals) => vals.join(',')).join(',')}
 ; wiping_volumes_matrix = ${this.wipingVolumesMatrix.map((vals) => vals.join(',')).join(',')}
+; wiping_volumes_use_custom_matrix = ${boolToIntString(this.wipingVolumesUseCustomMatrix)}
 ; xy_size_compensation = ${this.xySizeCompensation}
 ; z_offset = ${this.zOffset}
 `;

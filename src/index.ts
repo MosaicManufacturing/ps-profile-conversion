@@ -463,7 +463,7 @@ const index = ({
       }
     }
   }
-  profile.chamberTemperature = chamberTemperature;
+  profile.chamberTemperature.fill(chamberTemperature);
 
   for (let i = 0; i < extruderCount; i++) {
     const material = materials[i]!;
