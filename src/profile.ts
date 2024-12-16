@@ -156,7 +156,7 @@ export default class Profile {
   gapFillSpeed = 40;
   gcodeComments = false;
   gcodeFlavor = GCodeFlavor.REPRAP_SPRINTER;
-  gcodeLabelObjects = GcodeLabelObjects.OCTOPRINT;
+  gcodeLabelObjects = GcodeLabelObjects.OCTOPRINT; // currently required for Palette postprocessing
   gcodeResolution = 0.0125;
   gcodeSubstitutions = '';
   highCurrentOnFilamentSwap = false;
