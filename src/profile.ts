@@ -35,7 +35,7 @@ export default class Profile {
   bedTemperature: number[];
   beforeLayerGcode = '';
   betweenObjectsGcode = '';
-  binarygcode = false;
+  binaryGcode = false;
   bottomFillPattern = SolidFillPattern.MONOTONIC;
   bottomSolidLayers = 4;
   bottomSolidMinThickness = 0.5;
@@ -221,15 +221,15 @@ export default class Profile {
   originOffset: [number, number, number] = [0, 0, 0];
   outputFilenameFormat =
     '{input_filename_base}_{layer_height}mm_{filament_type[0]}_{printer_model}_{print_time}.gcode';
-  overHangFanSpeed0: number[];
-  overHangFanSpeed1: number[];
-  overHangFanSpeed2: number[];
-  overHangFanSpeed3: number[];
+  overhangFanSpeed0: number[];
+  overhangFanSpeed1: number[];
+  overhangFanSpeed2: number[];
+  overhangFanSpeed3: number[];
   overhangs = true; // 'Detect Bridging Perimeters'
-  overHangSpeed0 = 15;
-  overHangSpeed1 = 15;
-  overHangSpeed2 = 20;
-  overHangSpeed3 = 25;
+  overhangSpeed0 = 15;
+  overhangSpeed1 = 15;
+  overhangSpeed2 = 20;
+  overhangSpeed3 = 25;
   parkingPosRetraction = 0;
   pausePrintGcode = 'M601';
   perimeterAcceleration = 0;
@@ -466,10 +466,10 @@ export default class Profile {
     this.minPrintSpeed = new Array(extruderCount).fill(15);
     this.nozzleDiameter = new Array(extruderCount).fill(0.4);
     this.nozzleHighFlow = new Array(extruderCount).fill(false);
-    this.overHangFanSpeed0 = new Array(extruderCount).fill(0);
-    this.overHangFanSpeed1 = new Array(extruderCount).fill(0);
-    this.overHangFanSpeed2 = new Array(extruderCount).fill(0);
-    this.overHangFanSpeed3 = new Array(extruderCount).fill(0);
+    this.overhangFanSpeed0 = new Array(extruderCount).fill(0);
+    this.overhangFanSpeed1 = new Array(extruderCount).fill(0);
+    this.overhangFanSpeed2 = new Array(extruderCount).fill(0);
+    this.overhangFanSpeed3 = new Array(extruderCount).fill(0);
     this.retractBeforeTravel = new Array(extruderCount).fill(2);
     this.retractBeforeWipe = new Array(extruderCount).fill(0);
     this.retractLayerChange = new Array(extruderCount).fill(true);
@@ -543,7 +543,7 @@ export default class Profile {
 ; bed_temperature = ${this.bedTemperature.join(',')}
 ; before_layer_gcode = ${this.beforeLayerGcode || ';'}
 ; between_objects_gcode = ${this.betweenObjectsGcode || ';'}
-; binary_gcode = ${boolToIntString(this.binarygcode)}
+; binary_gcode = ${boolToIntString(this.binaryGcode)}
 ; bottom_fill_pattern = ${this.bottomFillPattern}
 ; bottom_solid_layers = ${this.bottomSolidLayers}
 ; bottom_solid_min_thickness = ${this.bottomSolidMinThickness}
@@ -728,14 +728,14 @@ export default class Profile {
 ; only_retract_when_crossing_perimeters = ${boolToIntString(this.onlyRetractWhenCrossingPerimeters)}
 ; ooze_prevention = ${boolToIntString(this.oozePrevention)}
 ; output_filename_format = ${this.outputFilenameFormat}
-; overhang_fan_speed_0 = ${this.overHangFanSpeed0.join(',')}
-; overhang_fan_speed_1 = ${this.overHangFanSpeed1.join(',')} 
-; overhang_fan_speed_2 = ${this.overHangFanSpeed2.join(',')} 
-; overhang_fan_speed_3 = ${this.overHangFanSpeed3.join(',')} 
-; overhang_speed_0 = ${this.overHangSpeed0}
-; overhang_speed_1 = ${this.overHangSpeed1}
-; overhang_speed_2 = ${this.overHangSpeed2}
-; overhang_speed_3 = ${this.overHangSpeed3}
+; overhang_fan_speed_0 = ${this.overhangFanSpeed0.join(',')}
+; overhang_fan_speed_1 = ${this.overhangFanSpeed1.join(',')} 
+; overhang_fan_speed_2 = ${this.overhangFanSpeed2.join(',')} 
+; overhang_fan_speed_3 = ${this.overhangFanSpeed3.join(',')} 
+; overhang_speed_0 = ${this.overhangSpeed0}
+; overhang_speed_1 = ${this.overhangSpeed1}
+; overhang_speed_2 = ${this.overhangSpeed2}
+; overhang_speed_3 = ${this.overhangSpeed3}
 ; overhangs = ${boolToIntString(this.overhangs)}
 ; parking_pos_retraction = ${this.parkingPosRetraction}
 ; pause_print_gcode = ${this.pausePrintGcode || ';'}
