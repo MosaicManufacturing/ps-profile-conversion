@@ -660,6 +660,7 @@ const index = ({
 
   // variable transition lengths
   if (variableTransitionLengths) {
+    profile.wipingVolumesUseCustomMatrix = true;
     if (variableTransitionLengths.advancedMode) {
       for (let i = 0; i < extruderCount; i++) {
         for (let j = 0; j < extruderCount; j++) {
@@ -685,6 +686,7 @@ const index = ({
       }
     }
   } else {
+    profile.wipingVolumesUseCustomMatrix = true;
     // set wiping volumes based on transition length
     const transitionVolume = filamentLengthToVolume(style.transitionLength);
     const halfTransitionVolume = roundTo(transitionVolume / 2, 2);
