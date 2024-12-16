@@ -613,9 +613,9 @@ export default class Profile {
 ; filament_multitool_ramming = ${this.filamentMultiToolRamming.map(boolToIntString).join(',')}
 ; filament_multitool_ramming_flow = ${this.filamentMultiToolRammingFlow.join(',')}
 ; filament_multitool_ramming_volume = ${this.filamentMultiToolRammingVolume.join(',')}
-; filament_notes = ${this.filamentNotes.map((notes) => `"${notes}"`).join(';')}
+; filament_notes = ${this.filamentNotes.map((notes) => `${notes}`).join(';')}
 ; filament_purge_multiplier = ${this.filamentPurgeMultiplier.join(',')}
-; filament_ramming_parameters = ${this.filamentRammingParameters.map((params) => `"${params}"`).join(';')}
+; filament_ramming_parameters = ${this.filamentRammingParameters.map((params) => `${params}`).join(';')}
 ; filament_retract_before_travel = ${this.filamentRetractBeforeTravel.join(',')}
 ; filament_retract_before_wipe = ${this.filamentRetractBeforeWipe.join(',')}
 ; filament_retract_layer_change = ${this.filamentRetractLayerChange.join(',')}
