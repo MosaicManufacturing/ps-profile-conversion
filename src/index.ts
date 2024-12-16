@@ -686,7 +686,7 @@ const index = ({
       }
     }
   } else {
-    profile.wipingVolumesUseCustomMatrix = true;
+    profile.wipingVolumesUseCustomMatrix = false;
     // set wiping volumes based on transition length
     const transitionVolume = filamentLengthToVolume(style.transitionLength);
     // Volume to purge
