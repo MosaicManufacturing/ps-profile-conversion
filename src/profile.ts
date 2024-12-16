@@ -4,7 +4,7 @@ import {
   DraftShieldMode,
   FuzzySkinType,
   GCodeFlavor,
-  GcodeLabelObjects,
+  GCodeLabelObjects,
   InfillPattern,
   IroningType,
   MachineLimitsUsage,
@@ -16,7 +16,6 @@ import {
   SupportStyle,
   TopOnePerimeterType,
 } from './enums';
-import { parseOverrides } from './overrides';
 import { boolToIntString, roundTo } from './utils';
 
 type Nil = 'nil';
@@ -157,7 +156,7 @@ export default class Profile {
   gapFillSpeed = 40;
   gcodeComments = false;
   gcodeFlavor = GCodeFlavor.REPRAP_SPRINTER;
-  gcodeLabelObjects = GcodeLabelObjects.OCTOPRINT; // currently required for Palette postprocessing
+  gcodeLabelObjects = GCodeLabelObjects.OCTOPRINT; // currently required for Palette postprocessing
   gcodeResolution = 0.0125;
   gcodeSubstitutions = '';
   highCurrentOnFilamentSwap = false;
@@ -884,18 +883,5 @@ export default class Profile {
 ; xy_size_compensation = ${this.xySizeCompensation}
 ; z_offset = ${this.zOffset}
 `;
-  }
-
-  toStringWithOverrides(text: string) {
-    let str = this.toString();
-    const overrides = parseOverrides(text);
-    Object.keys(overrides).forEach((key) => {
-      if (str.includes(`; ${key} =`)) {
-        const value = overrides[key]!;
-        const regex = new RegExp(`^; (${key}) = (.*)$`, 'm');
-        str = str.replace(regex, `; $1 = ${value}`);
-      }
-    });
-    return str;
   }
 }
