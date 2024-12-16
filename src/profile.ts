@@ -366,7 +366,6 @@ export default class Profile {
   wipeTowerWidth = 60;
   wipeTowerX = 180;
   wipeTowerY = 140;
-  wipingVolumesExtruders: [number, number][];
   wipingVolumesMatrix: number[][];
   wipingVolumesUseCustomMatrix = false;
   xySizeCompensation = 0;
@@ -492,7 +491,6 @@ export default class Profile {
     this.travelRampingLift = new Array(extruderCount).fill(false);
     this.travelSlope = new Array(extruderCount).fill(0);
     this.wipe = new Array(extruderCount).fill(false);
-    this.wipingVolumesExtruders = new Array(extruderCount).fill(0).map(() => [70, 70]);
     this.wipingVolumesMatrix = new Array(extruderCount)
       .fill(0)
       .map((_, i) => new Array(extruderCount).fill(0).map((__, j) => (i === j ? 0 : 140)));
@@ -875,7 +873,6 @@ export default class Profile {
 ; wipe_tower_width = ${this.wipeTowerWidth}
 ; wipe_tower_x = ${this.wipeTowerX}
 ; wipe_tower_y = ${this.wipeTowerY}
-; wiping_volumes_extruders = ${this.wipingVolumesExtruders.map((vals) => vals.join(',')).join(',')}
 ; wiping_volumes_matrix = ${this.wipingVolumesMatrix.map((vals) => vals.join(',')).join(',')}
 ; wiping_volumes_use_custom_matrix = ${boolToIntString(this.wipingVolumesUseCustomMatrix)}
 ; xy_size_compensation = ${this.xySizeCompensation}

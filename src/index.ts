@@ -689,9 +689,9 @@ const index = ({
     profile.wipingVolumesUseCustomMatrix = true;
     // set wiping volumes based on transition length
     const transitionVolume = filamentLengthToVolume(style.transitionLength);
-    const halfTransitionVolume = roundTo(transitionVolume / 2, 2);
+    // Volume to purge
+    profile.multiMaterialPurging = transitionVolume;
     for (let i = 0; i < extruderCount; i++) {
-      profile.wipingVolumesExtruders[i] = [halfTransitionVolume, halfTransitionVolume];
       for (let j = 0; j < extruderCount; j++) {
         if (i !== j) {
           profile.wipingVolumesMatrix[i]![j] = transitionVolume;
