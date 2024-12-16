@@ -370,6 +370,7 @@ export default class Profile {
   wipingVolumesUseCustomMatrix = false;
   xySizeCompensation = 0;
   zOffset = 0;
+
   // not used by PrusaSlicer
   clearBufferCommand = 'G4 P0';
   coolingModuleSpeed: number[];
@@ -396,7 +397,6 @@ export default class Profile {
     this.coolingModuleSpeed = new Array(extruderCount).fill(100);
     this.deretractSpeed = new Array(extruderCount).fill(0);
     this.disableFanFirstLayers = new Array(extruderCount).fill(1);
-    this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
     this.enableDynamicFanSpeeds = new Array(extruderCount).fill(false);
     this.endFilamentGcode = new Array(extruderCount).fill('');
     this.extruderColor = new Array(extruderCount).fill('#000000');
@@ -456,7 +456,6 @@ export default class Profile {
     this.filamentWipe = new Array(extruderCount).fill('nil');
     this.firstLayerBedTemperature = new Array(extruderCount).fill(0);
     this.firstLayerTemperature = new Array(extruderCount).fill(215);
-    this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
     this.fullFanSpeedLayer = new Array(extruderCount).fill(4);
     this.idleTemperature = new Array(extruderCount).fill('nil');
     this.maxFanSpeed = new Array(extruderCount).fill(100);
@@ -483,7 +482,6 @@ export default class Profile {
     this.retractSpeed = new Array(extruderCount).fill(35);
     this.slowdownBelowLayerTime = new Array(extruderCount).fill(15);
     this.startFilamentGcode = new Array(extruderCount).fill('');
-    this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
     this.temperature = new Array(extruderCount).fill(205);
     this.towerSpeed = new Array(extruderCount).fill(0);
     this.travelLiftBeforeObstacle = new Array(extruderCount).fill(false);
@@ -494,6 +492,13 @@ export default class Profile {
     this.wipingVolumesMatrix = new Array(extruderCount)
       .fill(0)
       .map((_, i) => new Array(extruderCount).fill(0).map((__, j) => (i === j ? 0 : 140)));
+
+    // not used by PrusaSlicer
+    this.towerSpeed = new Array(extruderCount).fill(0);
+    this.firstLayerTowerSpeed = new Array(extruderCount).fill(0);
+    this.startFilamentGcodePrinterscript = new Array(extruderCount).fill('');
+    this.enableCoolingModuleAtLayer = new Array(extruderCount).fill(0);
+    this.coolingModuleSpeed = new Array(extruderCount).fill(100);
     this.zOffsetPerExt = new Array(extruderCount).fill(0);
   }
 
