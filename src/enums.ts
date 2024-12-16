@@ -38,6 +38,7 @@ export enum InfillPattern {
 export enum SolidFillPattern {
   RECTILINEAR = 'rectilinear',
   MONOTONIC = 'monotonic',
+  MONOTONIC_LINES= 'monotoniclines',
   ALIGNED_RECTILINEAR = 'alignedrectilinear',
   CONCENTRIC = 'concentric',
   HILBERT_CURVE = 'hilbertcurve',
@@ -86,6 +87,7 @@ export enum FuzzySkinType {
 export enum SupportStyle {
   GRID = 'grid',
   SNUG = 'snug',
+  ORGANIC = 'organic',
 }
 
 export enum SupportInterfacePattern {
