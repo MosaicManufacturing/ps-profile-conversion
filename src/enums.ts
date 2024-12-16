@@ -99,7 +99,7 @@ export enum PerimeterGenerator {
   ARACHNE = 'arachne',
 }
 
-export enum GcodeLabelObjects {
+export enum GCodeLabelObjects {
   DISABLED = 'disabled', // Disabled
   OCTOPRINT = 'octoprint', // OctoPrint comments
   FIRMWARE = 'firmware', // Firmware-specific
@@ -107,11 +107,11 @@ export enum GcodeLabelObjects {
 
 export enum ArcFitting {
   DISABLED = 'disabled', // Disabled
-  EMIT_CENTER = 'emit_center', //Enabled: G2/3 I J
+  EMIT_CENTER = 'emit_center', // Enabled: G2/3 I J
 }
 
 export enum TopOnePerimeterType {
-  NONE = 'none', //Disabled
+  NONE = 'none', // Disabled
   TOP = 'top', // All top surfaces
   TOPMOST = 'topmost', // Topmost surface only
 }
