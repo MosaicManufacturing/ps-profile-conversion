@@ -169,7 +169,6 @@ export default class Profile {
   infillExtruder = 1;
   infillExtrusionWidth = 0.45;
   infillFirst = false;
-  infillOnlyWhereNeeded = false;
   infillOverlap = 25;
   infillSpeed = 80;
   interfaceShells = false;
@@ -326,7 +325,6 @@ export default class Profile {
   templateCustomGcode = '';
   thickBridges = false;
   thinWalls = true;
-  threads = 20;
   thumbnails: [number, number][] = [];
   thumbnailsFormat = 'PNG';
   toolchangeGcode = '';
@@ -681,7 +679,6 @@ export default class Profile {
 ; infill_extruder = ${this.infillExtruder}
 ; infill_extrusion_width = ${this.infillExtrusionWidth}
 ; infill_first = ${boolToIntString(this.infillFirst)}
-; infill_only_where_needed = ${boolToIntString(this.infillOnlyWhereNeeded)}
 ; infill_overlap = ${this.infillOverlap}%
 ; infill_speed = ${this.infillSpeed}
 ; interface_shells = ${boolToIntString(this.interfaceShells)}
@@ -837,7 +834,6 @@ export default class Profile {
 ; template_custom_gcode = ${this.templateCustomGcode || ';'}
 ; thick_bridges = ${boolToIntString(this.thickBridges)}
 ; thin_walls = ${boolToIntString(this.thinWalls)}
-; threads = ${this.threads}
 ; thumbnails = ${this.thumbnails.map(([x, y]) => `${x}x${y}`).join(',')}
 ; thumbnails_format = ${this.thumbnailsFormat}
 ; toolchange_gcode = ${this.toolchangeGcode || ';'}
