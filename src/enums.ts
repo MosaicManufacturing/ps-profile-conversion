@@ -5,8 +5,13 @@ export enum GCodeFlavor {
   TEACUP = 'teacup',
   MAKERWARE = 'makerware',
   MARLIN = 'marlin',
+  MARLIN_2 = 'marlin2',
+  KLIPPER = 'klipper',
   SAILFISH = 'sailfish',
   SMOOTHIE = 'smoothie',
+  MACH3 = 'mach3',
+  MACHINEKIT = 'machinekit',
+  NO_EXTRUSION = 'no-extrusion',
 }
 
 export enum MachineLimitsUsage {
@@ -33,12 +38,13 @@ export enum InfillPattern {
   ADAPTIVE_CUBIC = 'adaptivecubic',
   SUPPORT_CUBIC = 'supportcubic',
   LIGHTNING = 'lightning',
+  ZIG_ZAG = 'zigzag',
 }
 
 export enum SolidFillPattern {
   RECTILINEAR = 'rectilinear',
   MONOTONIC = 'monotonic',
-  MONOTONIC_LINES= 'monotoniclines',
+  MONOTONIC_LINES = 'monotoniclines',
   ALIGNED_RECTILINEAR = 'alignedrectilinear',
   CONCENTRIC = 'concentric',
   HILBERT_CURVE = 'hilbertcurve',
