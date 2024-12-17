@@ -21,6 +21,7 @@ import { boolToIntString, roundTo } from './utils';
 type Nil = 'nil';
 
 const SETTINGS_ID = 'out.3mf';
+const addPercent = (val: number) => `${val}%`;
 
 export default class Profile {
   // used indirectly
@@ -636,12 +637,12 @@ export default class Profile {
 ; filament_retract_restart_extra_toolchange = ${this.filamentRetractRestartExtraToolChange.join(',')}
 ; filament_retract_speed = ${this.filamentRetractSpeed.join(',')}
 ; filament_settings_id = ${this.filamentSettingsId.map((val) => `"${val}"`).join(';')}
-; filament_shrinkage_compensation_xy = ${this.filamentShrinkageCompensationXY.join(',')}
-; filament_shrinkage_compensation_z = ${this.filamentShrinkageCompensationZ.join(',')}
+; filament_shrinkage_compensation_xy = ${this.filamentShrinkageCompensationXY.map(addPercent).join(',')}
+; filament_shrinkage_compensation_z = ${this.filamentShrinkageCompensationZ.map(addPercent).join(',')}
 ; filament_soluble = ${this.filamentSoluble.map(boolToIntString).join(',')}
 ; filament_spool_weight = ${this.filamentSpoolWeight.join(',')}
 ; filament_stamping_distance = ${this.filamentStampingDistance.join(',')}
-; filament_stamping_loading_speed = ${this.filamentStampingLoadingSpeed.join(',')}
+; filament_stamping_loading_speed = ${this.filamentStampingLoadingSpeed.map(addPercent).join(',')}
 ; filament_toolchange_delay = ${this.filamentToolchangeDelay.join(',')}
 ; filament_travel_lift_before_obstacle = ${this.filamentTravelLiftBeforeObstacle.join(',')}
 ; filament_travel_max_lift = ${this.filamentTravelMaxLift.join(',')}
@@ -771,7 +772,7 @@ export default class Profile {
 ; remaining_times = ${boolToIntString(this.remainingTimes)}
 ; resolution = ${this.resolution}
 ; retract_before_travel = ${this.retractBeforeTravel.join(',')}
-; retract_before_wipe = ${this.retractBeforeWipe.map((val) => `${val}%`).join(',')}
+; retract_before_wipe = ${this.retractBeforeWipe.map(addPercent).join(',')}
 ; retract_layer_change = ${this.retractLayerChange.map(boolToIntString).join(',')}
 ; retract_length = ${this.retractLength.join(',')}
 ; retract_length_toolchange = ${this.retractLengthToolchange.join(',')}
@@ -835,7 +836,7 @@ export default class Profile {
 ; support_tree_branch_diameter_double_wall = ${this.supportTreeBranchDiameterDoubleWall}
 ; support_tree_branch_distance = ${this.supportTreeBranchDistance}
 ; support_tree_tip_diameter = ${this.supportTreeTipDiameter}
-; support_tree_top_rate = ${this.supportTreeTopRate}
+; support_tree_top_rate = ${this.supportTreeTopRate}%
 ; temperature = ${this.temperature.join(',')}
 ; template_custom_gcode = ${this.templateCustomGcode || ';'}
 ; thick_bridges = ${boolToIntString(this.thickBridges)}
@@ -873,8 +874,8 @@ export default class Profile {
 ; wipe_tower_bridging = ${this.wipeTowerBridging}
 ; wipe_tower_brim_width = ${this.wipeTowerBrimWidth}
 ; wipe_tower_cone_angle = ${this.wipeTowerConeAngle}
-; wipe_tower_extra_flow = ${this.wipeTowerExtraFlow}
-; wipe_tower_extra_spacing = ${this.wipeTowerExtraSpacing}
+; wipe_tower_extra_flow = ${this.wipeTowerExtraFlow}%
+; wipe_tower_extra_spacing = ${this.wipeTowerExtraSpacing}%
 ; wipe_tower_extruder = ${this.wipeTowerExtruder}
 ; wipe_tower_no_sparse_layers = ${boolToIntString(this.wipeTowerNoSparseLayers)}
 ; wipe_tower_rotation_angle = ${this.wipeTowerRotationAngle}
