@@ -16,6 +16,7 @@ import {
   SupportStyle,
   TopOnePerimeterType,
 } from './enums';
+import { parseOverrides } from './overrides';
 import { boolToIntString, roundTo } from './utils';
 
 type Nil = 'nil';
@@ -887,5 +888,18 @@ export default class Profile {
 ; xy_size_compensation = ${this.xySizeCompensation}
 ; z_offset = ${this.zOffset}
 `;
+  }
+
+  toStringWithOverrides(text: string) {
+    let str = this.toString();
+    const overrides = parseOverrides(text);
+    Object.keys(overrides).forEach((key) => {
+      if (str.includes(`; ${key} =`)) {
+        const value = overrides[key]!;
+        const regex = new RegExp(`^; (${key}) = (.*)$`, 'm');
+        str = str.replace(regex, `; $1 = ${value}`);
+      }
+    });
+    return str;
   }
 }
