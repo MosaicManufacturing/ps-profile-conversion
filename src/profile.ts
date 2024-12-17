@@ -133,6 +133,7 @@ export default class Profile {
   filamentTravelSlope: Nil[];
   filamentType: string[];
   filamentUnloadingSpeed: number[];
+  idleTemperature: Nil[];
   filamentUnloadingSpeedStart: number[];
   filamentUnloadTime: number[];
   filamentVendor = 'Generic';
