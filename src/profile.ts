@@ -29,7 +29,7 @@ export default class Profile {
   originOffset: [number, number, number] = [0, 0, 0];
   bedCircular = false;
 
-  // ps-config fields
+  // PrusaSlicer config fields
   arcFitting = ArcFitting.DISABLED;
   autoEmitTemperatureCommands = true;
   avoidCrossingCurledOverhangs = false;
