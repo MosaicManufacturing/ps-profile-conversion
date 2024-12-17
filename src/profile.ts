@@ -23,15 +23,19 @@ type Nil = 'nil';
 const SETTINGS_ID = 'out.3mf';
 
 export default class Profile {
+  // used indirectly
+  bedSize: [number, number, number] = [250, 250, 210];
+  originOffset: [number, number, number] = [0, 0, 0];
+  bedCircular = false;
+
+  // ps-config fields
   arcFitting = ArcFitting.DISABLED;
   autoEmitTemperatureCommands = true;
   avoidCrossingCurledOverhangs = false;
   avoidCrossingPerimeters = false;
   avoidCrossingPerimetersMaxDetour: number | string = 0;
-  bedCircular = false;
   bedCustomModel = '';
   bedCustomTexture = '';
-  bedSize: [number, number, number] = [250, 250, 210];
   bedTemperature: number[];
   beforeLayerGcode = '';
   betweenObjectsGcode = '';
@@ -72,8 +76,8 @@ export default class Profile {
   ensureVerticalShellThickness = true;
   externalPerimeterAcceleration = 0;
   externalPerimeterExtrusionWidth = 0.45;
-  externalPerimetersFirst = false;
   externalPerimeterSpeed = 25;
+  externalPerimetersFirst = false;
   extraLoadingMove = 0;
   extraPerimeters = false;
   extraPerimetersOnOverhangs = false;
@@ -97,9 +101,9 @@ export default class Profile {
   filamentDiameter: number[];
   filamentInfillMaxCrossingSpeed: number[];
   filamentInfillMaxSpeed: number[];
+  filamentLoadTime: number[];
   filamentLoadingSpeed: number[];
   filamentLoadingSpeedStart: number[];
-  filamentLoadTime: number[];
   filamentMaxVolumetricSpeed: number[];
   filamentMinimalPurgeOnWipeTower: number[];
   filamentMultiToolRamming: boolean[];
@@ -125,17 +129,16 @@ export default class Profile {
   filamentSoluble: boolean[];
   filamentSpoolWeight: number[];
   filamentStampingDistance: number[];
-  filamentStampingLoadingSpeed: number[];
+  filamentStampingLoadingSpeed: number[]; // REMOVed?
   filamentToolchangeDelay: number[];
   filamentTravelLiftBeforeObstacle: Nil[];
   filamentTravelMaxLift: Nil[];
   filamentTravelRampingLift: Nil[];
   filamentTravelSlope: Nil[];
   filamentType: string[];
-  filamentUnloadingSpeed: number[];
-  idleTemperature: Nil[];
-  filamentUnloadingSpeedStart: number[];
   filamentUnloadTime: number[];
+  filamentUnloadingSpeed: number[];
+  filamentUnloadingSpeedStart: number[];
   filamentVendor = 'Generic';
   filamentWipe: Nil[];
   fillAngle = 45;
@@ -162,7 +165,7 @@ export default class Profile {
   gcodeSubstitutions = '';
   highCurrentOnFilamentSwap = false;
   hostType = 'octoprint';
-  idleTemperature: (number | Nil)[];
+  idleTemperature: Nil[];
   infillAcceleration = 0;
   infillAnchor = 2.5;
   infillAnchorMax = 12;
@@ -219,36 +222,35 @@ export default class Profile {
   onlyOnePerimeterFirstLayer = false;
   onlyRetractWhenCrossingPerimeters = false;
   oozePrevention = false;
-  originOffset: [number, number, number] = [0, 0, 0];
   outputFilenameFormat =
     '{input_filename_base}_{layer_height}mm_{filament_type[0]}_{printer_model}_{print_time}.gcode';
   overhangFanSpeed0: number[];
   overhangFanSpeed1: number[];
   overhangFanSpeed2: number[];
   overhangFanSpeed3: number[];
-  overhangs = true; // 'Detect Bridging Perimeters'
   overhangSpeed0 = 15;
   overhangSpeed1 = 15;
   overhangSpeed2 = 20;
   overhangSpeed3 = 25;
+  overhangs = true; // 'Detect Bridging Perimeters'
   parkingPosRetraction = 0;
   pausePrintGcode = 'M601';
   perimeterAcceleration = 0;
   perimeterExtruder = 1;
   perimeterExtrusionWidth = 0.45;
   perimeterGenerator = PerimeterGenerator.ARACHNE;
-  perimeters = 2;
   perimeterSpeed = 45;
+  perimeters = 2;
   physicalPrinterSettingsId = '';
   postProcess = '';
   preferClockwiseMovements = false;
+  printSettingsId = SETTINGS_ID;
   printerModel = '';
   printerNotes = '';
   printerSettingsId = SETTINGS_ID;
   printerTechnology = 'FFF';
   printerVariant = '';
   printerVendor = '';
-  printSettingsId = SETTINGS_ID;
   raftContactDistance = 0.2;
   raftExpansion = 1.5;
   raftFirstLayerDensity = 90;
