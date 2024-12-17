@@ -641,7 +641,7 @@ export default class Profile {
 ; filament_soluble = ${this.filamentSoluble.map(boolToIntString).join(',')}
 ; filament_spool_weight = ${this.filamentSpoolWeight.join(',')}
 ; filament_stamping_distance = ${this.filamentStampingDistance.join(',')}
-; filament_stamping_loading_speed = ${this.filamentStampingDistance.join(',')}
+; filament_stamping_loading_speed = ${this.filamentStampingLoadingSpeed.join(',')}
 ; filament_toolchange_delay = ${this.filamentToolchangeDelay.join(',')}
 ; filament_travel_lift_before_obstacle = ${this.filamentTravelLiftBeforeObstacle.join(',')}
 ; filament_travel_max_lift = ${this.filamentTravelMaxLift.join(',')}
