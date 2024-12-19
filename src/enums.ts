@@ -5,8 +5,13 @@ export enum GCodeFlavor {
   TEACUP = 'teacup',
   MAKERWARE = 'makerware',
   MARLIN = 'marlin',
+  MARLIN_2 = 'marlin2',
+  KLIPPER = 'klipper',
   SAILFISH = 'sailfish',
   SMOOTHIE = 'smoothie',
+  MACH3 = 'mach3',
+  MACHINEKIT = 'machinekit',
+  NO_EXTRUSION = 'no-extrusion',
 }
 
 export enum MachineLimitsUsage {
@@ -33,11 +38,13 @@ export enum InfillPattern {
   ADAPTIVE_CUBIC = 'adaptivecubic',
   SUPPORT_CUBIC = 'supportcubic',
   LIGHTNING = 'lightning',
+  ZIG_ZAG = 'zigzag',
 }
 
 export enum SolidFillPattern {
   RECTILINEAR = 'rectilinear',
   MONOTONIC = 'monotonic',
+  MONOTONIC_LINES = 'monotoniclines',
   ALIGNED_RECTILINEAR = 'alignedrectilinear',
   CONCENTRIC = 'concentric',
   HILBERT_CURVE = 'hilbertcurve',
@@ -86,6 +93,7 @@ export enum FuzzySkinType {
 export enum SupportStyle {
   GRID = 'grid',
   SNUG = 'snug',
+  ORGANIC = 'organic',
 }
 
 export enum SupportInterfacePattern {
@@ -97,4 +105,21 @@ export enum SupportInterfacePattern {
 export enum PerimeterGenerator {
   CLASSIC = 'classic',
   ARACHNE = 'arachne',
+}
+
+export enum GCodeLabelObjects {
+  DISABLED = 'disabled', // Disabled
+  OCTOPRINT = 'octoprint', // OctoPrint comments
+  FIRMWARE = 'firmware', // Firmware-specific
+}
+
+export enum ArcFitting {
+  DISABLED = 'disabled', // Disabled
+  EMIT_CENTER = 'emit_center', // Enabled: G2/3 I J
+}
+
+export enum TopOnePerimeterType {
+  NONE = 'none', // Disabled
+  TOP = 'top', // All top surfaces
+  TOPMOST = 'topmost', // Topmost surface only
 }
