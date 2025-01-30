@@ -584,7 +584,7 @@ export default class Profile {
 ; duplicate_distance = ${this.duplicateDistance}
 ; elefant_foot_compensation = ${this.elephantFootCompensation}
 ; enable_dynamic_fan_speeds = ${this.enableDynamicFanSpeeds.map(boolToIntString).join(',')}
-; enable_dynamic_overhang_speeds = ${this.enableDynamicOverhangSpeeds}
+; enable_dynamic_overhang_speeds = ${boolToIntString(this.enableDynamicOverhangSpeeds)}
 ; end_filament_gcode = ${this.endFilamentGcode.map((gcode) => (gcode ? `"${gcode}"` : '";"')).join(';')}
 ; end_gcode = ${this.endGcode || ';'}
 ; ensure_vertical_shell_thickness = ${boolToIntString(this.ensureVerticalShellThickness)}
@@ -594,7 +594,7 @@ export default class Profile {
 ; external_perimeters_first = ${boolToIntString(this.externalPerimetersFirst)}
 ; extra_loading_move = ${this.extraLoadingMove}
 ; extra_perimeters = ${boolToIntString(this.extraPerimeters)}
-; extra_perimeters_on_overhangs = ${this.extraPerimetersOnOverhangs}
+; extra_perimeters_on_overhangs = ${boolToIntString(this.extraPerimetersOnOverhangs)}
 ; extruder_clearance_height = ${this.extruderClearanceHeight}
 ; extruder_clearance_radius = ${this.extruderClearanceRadius}
 ; extruder_colour = ${this.extruderColor.join(';')}
