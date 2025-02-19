@@ -710,6 +710,23 @@ const index = ({
       profile.preSideTransitionPrinterscript = '';
       profile.sideTransitionPrinterscript = '';
       profile.postSideTransitionPrinterscript = '';
+      // Overrides for enabling element "Print Fast"
+      profile.machineMaxFeedrateX = [300, 300];
+      profile.machineMaxFeedrateY = [300, 300];
+      profile.machineMaxFeedrateZ = [10, 10];
+      profile.machineMaxFeedrateE = [60, 60];
+      profile.machineMaxAccelerationX = [9000, 9000];
+      profile.machineMaxAccelerationY = [9000, 9000];
+      profile.machineMaxAccelerationZ = [500, 500];
+      profile.machineMaxAccelerationE = [9000, 9000];
+      profile.machineMaxAccelerationExtruding = [9000, 9000];
+      profile.machineMaxAccelerationRetracting = [10000, 10000];
+      profile.machineMaxAccelerationTravel = [10000, 10000];
+      profile.machineMaxJerkX = [8, 8];
+      profile.machineMaxJerkY = [8, 8];
+      profile.machineMaxJerkZ = [0.4, 0.4];
+      profile.machineMaxJerkE = [5, 5];
+      profile.gcodeFlavor = GCodeFlavor.MARLIN_2;
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
