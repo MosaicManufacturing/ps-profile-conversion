@@ -710,6 +710,7 @@ const index = ({
       profile.preSideTransitionPrinterscript = '';
       profile.sideTransitionPrinterscript = '';
       profile.postSideTransitionPrinterscript = '';
+      profile.gcodeFlavor = GCodeFlavor.MARLIN_2;
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
