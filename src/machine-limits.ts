@@ -41,6 +41,12 @@ export const applyMachineLimits = (profile: Profile, machineLimits: MachineLimit
         machineLimits.maxAcceleration.retracting,
       ];
     }
+    if (machineLimits.maxAcceleration.travel !== undefined) {
+      profile.machineMaxAccelerationTravel = [
+        machineLimits.maxAcceleration.travel,
+        machineLimits.maxAcceleration.travel,
+      ];
+    }
   }
   if (machineLimits.maxJerk) {
     if (machineLimits.maxJerk.x !== undefined) {

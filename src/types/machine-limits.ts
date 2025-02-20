@@ -12,6 +12,7 @@ export interface MachineLimits {
     e?: number;
     extruding?: number;
     retracting?: number;
+    travel?: number;
   };
   maxJerk?: {
     x?: number;
