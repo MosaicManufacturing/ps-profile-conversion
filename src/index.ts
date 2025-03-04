@@ -1,4 +1,13 @@
-import { BrimType, GCodeFlavor, InfillPattern, SeamPosition, SolidFillPattern } from './enums';
+import {
+  ArcFitting,
+  BrimType,
+  GCodeFlavor,
+  InfillPattern,
+  SeamPosition,
+  SolidFillPattern,
+  SupportStyle,
+  TopOnePerimeterType,
+} from './enums';
 import { applyMachineLimits } from './machine-limits';
 import Profile from './profile';
 import { applyStartSequenceDefaults, convertToPrinterScript } from './sequences';
@@ -7,7 +16,12 @@ import type { Material } from './types/materials';
 import type { PaletteData } from './types/palette';
 import type { MachineSettings } from './types/printers';
 import { Firmware } from './types/printers';
-import { slic3rInfillStylesToFillPattern, type StyleSettings, TransitionMethod } from './types/styles';
+import {
+  CanvasSupportStyle,
+  slic3rInfillStylesToFillPattern,
+  type StyleSettings,
+  TransitionMethod,
+} from './types/styles';
 import type { TransitionTower, VariableTransitions } from './types/transitions';
 import {
   getMaterialFieldValue,
@@ -45,12 +59,35 @@ const convertSupportDensity = (density: number, extrusionWidth: number): number 
   }
 };
 
+const convertSupportStyle = (supportStyle: CanvasSupportStyle): SupportStyle => {
+  switch (supportStyle) {
+    case CanvasSupportStyle.Grid: // grid
+      return SupportStyle.GRID;
+    case CanvasSupportStyle.Snug: // snug
+      return SupportStyle.SNUG;
+    default:
+      return SupportStyle.GRID;
+  }
+};
+
 const densityToSpacing = (density: number, extrusionWidth: number): number =>
   roundTo((100 / density - 1) * extrusionWidth, 2);
 
 // volume of a cylinder = pi * r^2 * h
 const filamentLengthToVolume = (length: number, diameter = 1.75): number =>
   roundTo((diameter / 2) ** 2 * Math.PI * length, 2);
+
+// extract number from `${number}%`
+const extractNumberValue = (value: number | string): number => {
+  if (typeof value === 'number') {
+    return value;
+  }
+  const parsedFloat = parseFloat(value.replace('%', '').trim());
+  if (Number.isNaN(parsedFloat)) {
+    throw new Error(`Error parsing number from string: ${value}`);
+  }
+  return parsedFloat;
+};
 
 interface Inputs {
   usableInputCount: number | null;
@@ -186,7 +223,18 @@ const index = ({
   } else {
     profile.externalPerimeterExtrusionWidth = style.extrusionWidth;
   }
-  profile.firstLayerExtrusionWidth = style.extrusionWidth;
+  if (style.firstLayerExtrusionWidth) {
+    if (style.firstLayerExtrusionWidth.units === 'mm') {
+      profile.firstLayerExtrusionWidth = style.firstLayerExtrusionWidth.value;
+    } else {
+      profile.firstLayerExtrusionWidth = roundTo(
+        (style.extrusionWidth * style.firstLayerExtrusionWidth.value) / 100,
+        4
+      );
+    }
+  } else {
+    profile.firstLayerExtrusionWidth = style.extrusionWidth;
+  }
   profile.infillExtrusionWidth = variantValue(
     style.infillExtrusionWidth,
     style.extrusionWidth,
@@ -274,6 +322,40 @@ const index = ({
     profile.elephantFootCompensation = style.firstLayerSizeCompensation;
   }
 
+  if (style.extraPerimetersIfNeeded !== undefined) {
+    profile.extraPerimeters = style.extraPerimetersIfNeeded;
+  }
+  if (style.extraPerimetersOnOverhangs !== undefined) {
+    profile.extraPerimetersOnOverhangs = style.extraPerimetersOnOverhangs;
+  }
+  profile.arcFitting = style.useArcMoves ? ArcFitting.EMIT_CENTER : ArcFitting.DISABLED;
+  if (style.detectBridgingPerimeters !== undefined) {
+    profile.overhangs = style.detectBridgingPerimeters;
+  }
+  if (style.singlePerimeterOnTopLayers !== undefined) {
+    profile.topOnePerimeterType = style.singlePerimeterOnTopLayers
+      ? TopOnePerimeterType.TOP
+      : TopOnePerimeterType.NONE;
+  }
+
+  if (style.infillAnchorLength) {
+    if (style.infillAnchorLength.units === 'mm') {
+      profile.infillAnchor = style.infillAnchorLength.value;
+    } else {
+      profile.infillAnchor = `${style.infillAnchorLength.value}%`;
+    }
+  }
+  if (style.maxInfillAnchorLength) {
+    if (style.maxInfillAnchorLength.units === 'mm') {
+      profile.infillAnchorMax = style.maxInfillAnchorLength.value;
+    } else {
+      profile.infillAnchorMax = `${style.maxInfillAnchorLength.value}%`;
+    }
+  }
+  if (style.solidLayerThresholdArea !== undefined) {
+    profile.solidInfillBelowArea = style.solidLayerThresholdArea;
+  }
+
   // skirt/brim
   if (style.useBrim) {
     if (style.brimLayers > 1) {
@@ -296,7 +378,17 @@ const index = ({
 
   // speeds
   profile.solidInfillSpeed = style.solidLayerSpeed;
-  profile.topSolidInfillSpeed = profile.solidInfillSpeed;
+
+  if (style.topSolidLayerSpeed) {
+    if (style.topSolidLayerSpeed.units === 'mm/s') {
+      profile.topSolidInfillSpeed = style.topSolidLayerSpeed.value;
+    } else {
+      profile.topSolidInfillSpeed = `${style.topSolidLayerSpeed.value}%`;
+    }
+  } else {
+    profile.topSolidInfillSpeed = profile.solidInfillSpeed;
+  }
+
   if (style.perimeterSpeed) {
     profile.perimeterSpeed = variantValue(style.perimeterSpeed, style.solidLayerSpeed, style.solidLayerSpeed);
   } else {
@@ -311,7 +403,21 @@ const index = ({
   } else {
     profile.externalPerimeterSpeed = style.solidLayerSpeed;
   }
-  profile.smallPerimeterSpeed = Math.min(profile.perimeterSpeed, profile.externalPerimeterSpeed);
+
+  if (style.smallPerimeterSpeed) {
+    if (style.smallPerimeterSpeed.units === 'mm/s') {
+      profile.smallPerimeterSpeed = style.smallPerimeterSpeed.value;
+    } else {
+      profile.smallPerimeterSpeed = `${style.smallPerimeterSpeed.value}%`;
+    }
+  } else {
+    profile.smallPerimeterSpeed = Math.min(profile.perimeterSpeed, profile.externalPerimeterSpeed);
+  }
+
+  if (style.gapFillSpeed !== undefined) {
+    profile.gapFillSpeed = style.gapFillSpeed;
+  }
+
   profile.travelSpeed = style.rapidXYSpeed;
   profile.travelSpeedZ = style.rapidZSpeed;
   profile.machineMaxFeedrateX = [style.rapidXYSpeed, style.rapidXYSpeed];
@@ -326,7 +432,7 @@ const index = ({
     // excludes infill, first layer, and travel speeds
     const fastestSpeed = Math.max(
       profile.solidInfillSpeed,
-      profile.topSolidInfillSpeed,
+      extractNumberValue(profile.topSolidInfillSpeed),
       profile.perimeterSpeed,
       profile.externalPerimeterSpeed
     );
@@ -343,10 +449,55 @@ const index = ({
     profile.supportMaterialInterfaceSpeed = style.solidLayerSpeed;
   }
 
+  // acceleration settings
+  if (style.useAccelerationControl === false) {
+    // if acceleration control is disabled, set all to 0
+    profile.defaultAcceleration = 0;
+    profile.solidInfillAcceleration = 0;
+    profile.topSolidInfillAcceleration = 0;
+    profile.infillAcceleration = 0;
+    profile.perimeterAcceleration = 0;
+    profile.externalPerimeterAcceleration = 0;
+    profile.firstLayerAcceleration = 0;
+    profile.bridgeAcceleration = 0;
+    profile.travelAcceleration = 0;
+  } else {
+    if (style.defaultAcceleration !== undefined) {
+      profile.defaultAcceleration = style.defaultAcceleration;
+    }
+    if (style.solidLayerAcceleration !== undefined) {
+      profile.solidInfillAcceleration = style.solidLayerAcceleration;
+    }
+    if (style.topSolidLayerAcceleration !== undefined) {
+      profile.topSolidInfillAcceleration = style.topSolidLayerAcceleration;
+    }
+    if (style.infillAcceleration !== undefined) {
+      profile.infillAcceleration = style.infillAcceleration;
+    }
+    if (style.perimeterAcceleration !== undefined) {
+      profile.perimeterAcceleration = style.perimeterAcceleration;
+    }
+    if (style.externalPerimeterAcceleration !== undefined) {
+      profile.externalPerimeterAcceleration = style.externalPerimeterAcceleration;
+    }
+    if (style.firstLayerAcceleration !== undefined) {
+      profile.firstLayerAcceleration = style.firstLayerAcceleration;
+    }
+    if (style.bridgingAcceleration !== undefined) {
+      profile.bridgeAcceleration = style.bridgingAcceleration;
+    }
+    if (style.travelAcceleration !== undefined) {
+      profile.travelAcceleration = style.travelAcceleration;
+    }
+  }
+
   // supports
   profile.supportMaterial = style.useSupport;
   profile.supportMaterialAuto = !style.useCustomSupports;
   profile.supportMaterialSpacing = convertSupportDensity(style.supportDensity, profile.extrusionWidth);
+  if (style.supportStyle !== undefined) {
+    profile.supportMaterialStyle = convertSupportStyle(style.supportStyle);
+  }
   if (style.useCustomSupports) {
     profile.supportMaterialThreshold = 90;
   } else {
@@ -510,13 +661,62 @@ const index = ({
   // cooling fan
   for (let i = 0; i < extruderCount; i++) {
     const material = materials[i]!;
-    profile.slowdownBelowLayerTime[i] = style.minLayerTime;
+    profile.slowdownBelowLayerTime[i] = getMaterialFieldValue(material, 'minLayerTime', style.minLayerTime);
     const useFan = getMaterialFieldValue(material, 'useFan', style.useFan);
     if (useFan) {
       profile.fanAlwaysOn[i] = true;
       const fanSpeedMaterial = getMaterialFieldValue(material, 'fanSpeed', style.fanSpeed);
       profile.minFanSpeed[i] = fanSpeedMaterial;
-      profile.maxFanSpeed[i] = fanSpeedMaterial;
+
+      const maxFanSpeedMaterial = getMaterialFieldValue(material, 'maxFanSpeed', style.maxFanSpeed);
+      if (maxFanSpeedMaterial && maxFanSpeedMaterial.value !== 'auto') {
+        profile.maxFanSpeed[i] = maxFanSpeedMaterial.value;
+      } else {
+        profile.maxFanSpeed[i] = fanSpeedMaterial;
+      }
+
+      const useDynamicFanSpeedsMaterial = getMaterialFieldValue(
+        material,
+        'useDynamicFanSpeeds',
+        style.useDynamicFanSpeeds
+      );
+      profile.enableDynamicFanSpeeds[i] = useDynamicFanSpeedsMaterial;
+
+      // set fan speeds for overhangs if dynamic fan speeds are enabled
+      if (profile.enableDynamicFanSpeeds[i]) {
+        profile.overhangFanSpeed0[i] = getMaterialFieldValue(
+          material,
+          'overhangFanSpeed0',
+          style.overhangFanSpeed0
+        );
+        profile.overhangFanSpeed1[i] = getMaterialFieldValue(
+          material,
+          'overhangFanSpeed1',
+          style.overhangFanSpeed1
+        );
+        profile.overhangFanSpeed2[i] = getMaterialFieldValue(
+          material,
+          'overhangFanSpeed2',
+          style.overhangFanSpeed2
+        );
+        profile.overhangFanSpeed3[i] = getMaterialFieldValue(
+          material,
+          'overhangFanSpeed3',
+          style.overhangFanSpeed3
+        );
+      } else {
+        profile.overhangFanSpeed0[i] = 0;
+        profile.overhangFanSpeed1[i] = 0;
+        profile.overhangFanSpeed2[i] = 0;
+        profile.overhangFanSpeed3[i] = 0;
+      }
+
+      profile.fanBelowLayerTime[i] = getMaterialFieldValue(
+        material,
+        'fanBelowLayerTime',
+        style.fanBelowLayerTime
+      );
+
       const bridgeFanSpeedMaterial = getMaterialFieldValue(
         material,
         'bridgingFanSpeed',
@@ -541,6 +741,11 @@ const index = ({
       profile.minFanSpeed[i] = 0;
       profile.maxFanSpeed[i] = 0;
       profile.bridgeFanSpeed[i] = 0;
+      profile.enableDynamicFanSpeeds[i] = false;
+      profile.overhangFanSpeed0[i] = 0;
+      profile.overhangFanSpeed1[i] = 0;
+      profile.overhangFanSpeed2[i] = 0;
+      profile.overhangFanSpeed3[i] = 0;
     }
   }
 
@@ -612,6 +817,10 @@ const index = ({
         );
       }
     }
+
+    // apply minPrintSpeed from material profile or use a default value
+    const material = materials[i]!;
+    profile.minPrintSpeed[i] = getMaterialFieldValue(material, 'minPrintSpeed', 15);
   }
 
   // material names and colors

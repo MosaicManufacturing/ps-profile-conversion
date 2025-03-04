@@ -21,6 +21,15 @@ export interface MaterialStyleValues {
   useCoolingModule: boolean;
   coolingModuleSpeed: number;
   enableCoolingModuleAtLayer: number;
+  maxFanSpeed: NumericStyleVariant<'%'> | AutoStyleVariant;
+  useDynamicFanSpeeds: boolean;
+  overhangFanSpeed0: number;
+  overhangFanSpeed1: number;
+  overhangFanSpeed2: number;
+  overhangFanSpeed3: number;
+  minLayerTime: number;
+  fanBelowLayerTime: number;
+  minPrintSpeed: number;
 }
 
 export type MaterialStyleFlags = {
