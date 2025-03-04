@@ -35,9 +35,9 @@ export enum Slic3rInfillStyle {
   Lightning = 5,
 }
 
-export enum SupportStylesCanvas {
-  grid = 0,
-  snug = 1,
+export enum CanvasSupportStyle {
+  Grid = 0,
+  Snug = 1,
 }
 
 export const slic3rInfillStylesToFillPattern: Readonly<Record<Slic3rInfillStyle, InfillPattern>> = {
@@ -208,5 +208,5 @@ export interface StyleSettings {
   overhangFanSpeed2: number;
   overhangFanSpeed3: number;
   fanBelowLayerTime: number;
-  supportStyle: SupportStylesCanvas;
+  supportStyle: CanvasSupportStyle;
 }

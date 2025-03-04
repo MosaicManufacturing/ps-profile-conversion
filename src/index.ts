@@ -17,9 +17,9 @@ import type { PaletteData } from './types/palette';
 import type { MachineSettings } from './types/printers';
 import { Firmware } from './types/printers';
 import {
+  CanvasSupportStyle,
   slic3rInfillStylesToFillPattern,
   type StyleSettings,
-  SupportStylesCanvas,
   TransitionMethod,
 } from './types/styles';
 import type { TransitionTower, VariableTransitions } from './types/transitions';
@@ -59,11 +59,11 @@ const convertSupportDensity = (density: number, extrusionWidth: number): number 
   }
 };
 
-const convertSupportStyle = (supportStyle: SupportStylesCanvas): SupportStyle => {
+const convertSupportStyle = (supportStyle: CanvasSupportStyle): SupportStyle => {
   switch (supportStyle) {
-    case SupportStylesCanvas.grid: // grid
+    case CanvasSupportStyle.Grid: // grid
       return SupportStyle.GRID;
-    case SupportStylesCanvas.snug: // snug
+    case CanvasSupportStyle.Snug: // snug
       return SupportStyle.SNUG;
     default:
       return SupportStyle.GRID;
