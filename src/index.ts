@@ -59,8 +59,8 @@ const convertSupportDensity = (density: number, extrusionWidth: number): number 
   }
 };
 
-const convertSolidFillPattern = (solidFillPattern: SupportStylesCanvas): SupportStyle => {
-  switch (solidFillPattern) {
+const convertSupportStyle = (supportStyle: SupportStylesCanvas): SupportStyle => {
+  switch (supportStyle) {
     case SupportStylesCanvas.grid: // grid
       return SupportStyle.GRID;
     case SupportStylesCanvas.snug: // snug
@@ -496,7 +496,7 @@ const index = ({
   profile.supportMaterialAuto = !style.useCustomSupports;
   profile.supportMaterialSpacing = convertSupportDensity(style.supportDensity, profile.extrusionWidth);
   if (style.supportStyle !== undefined) {
-    profile.supportMaterialStyle = convertSolidFillPattern(style.supportStyle);
+    profile.supportMaterialStyle = convertSupportStyle(style.supportStyle);
   }
   if (style.useCustomSupports) {
     profile.supportMaterialThreshold = 90;
