@@ -35,6 +35,11 @@ export enum Slic3rInfillStyle {
   Lightning = 5,
 }
 
+export enum SupportStylesCanvas {
+  grid = 0,
+  snug = 1,
+}
+
 export const slic3rInfillStylesToFillPattern: Readonly<Record<Slic3rInfillStyle, InfillPattern>> = {
   [Slic3rInfillStyle.Rectilinear]: InfillPattern.RECTILINEAR,
   [Slic3rInfillStyle.Triangles]: InfillPattern.TRIANGLES,
@@ -174,4 +179,34 @@ export interface StyleSettings {
   coolingModuleSpeed: number;
   enableCoolingModuleAtLayer: number;
   slic3rInfillStyle: Slic3rInfillStyle;
+  useArcMoves: boolean;
+  extraPerimetersIfNeeded: boolean;
+  extraPerimetersOnOverhangs: boolean;
+  detectBridgingPerimeters: boolean;
+  singlePerimeterOnTopLayers: boolean;
+  infillAnchorLength: NumericStyleVariant<'mm'> | NumericStyleVariant<'%'>;
+  maxInfillAnchorLength: NumericStyleVariant<'mm'> | NumericStyleVariant<'%'>;
+  solidLayerThresholdArea: number;
+  topSolidLayerSpeed: NumericStyleVariant<'mm/s'> | NumericStyleVariant<'%'>;
+  smallPerimeterSpeed: NumericStyleVariant<'mm/s'> | NumericStyleVariant<'%'>;
+  gapFillSpeed: number;
+  useAccelerationControl: boolean;
+  defaultAcceleration: number;
+  solidLayerAcceleration: number;
+  topSolidLayerAcceleration: number;
+  infillAcceleration: number;
+  perimeterAcceleration: number;
+  externalPerimeterAcceleration: number;
+  firstLayerAcceleration: number;
+  bridgingAcceleration: number;
+  travelAcceleration: number;
+  firstLayerExtrusionWidth: NumericStyleVariant<'mm'> | NumericStyleVariant<'%'>;
+  maxFanSpeed: NumericStyleVariant<'%'> | AutoStyleVariant;
+  useDynamicFanSpeeds: boolean;
+  overhangFanSpeed0: number;
+  overhangFanSpeed1: number;
+  overhangFanSpeed2: number;
+  overhangFanSpeed3: number;
+  fanBelowLayerTime: number;
+  supportStyle: SupportStylesCanvas;
 }

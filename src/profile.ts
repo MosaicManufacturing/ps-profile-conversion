@@ -169,8 +169,8 @@ export default class Profile {
   hostType = 'octoprint';
   idleTemperature: Nil[];
   infillAcceleration = 0;
-  infillAnchor = 2.5;
-  infillAnchorMax = 12;
+  infillAnchor: number | string = 2.5;
+  infillAnchorMax: number | string = 12;
   infillEveryLayers = 1;
   infillExtruder = 1;
   infillExtrusionWidth = 0.45;
@@ -281,7 +281,7 @@ export default class Profile {
   sliceClosingRadius = 0.049;
   slicingMode = 'regular';
   slowdownBelowLayerTime: number[];
-  smallPerimeterSpeed = 0;
+  smallPerimeterSpeed: number | string = 0;
   solidInfillAcceleration = 0;
   solidInfillBelowArea = 0;
   solidInfillEveryLayers = 0;
@@ -337,7 +337,7 @@ export default class Profile {
   topInfillExtrusionWidth = 0.4;
   topOnePerimeterType = TopOnePerimeterType.NONE;
   topSolidInfillAcceleration = 0;
-  topSolidInfillSpeed = 40;
+  topSolidInfillSpeed: number | string = 40;
   topSolidLayers = 5;
   topSolidMinThickness = 0.7;
   travelAcceleration = 0;
