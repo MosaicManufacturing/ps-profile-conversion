@@ -914,12 +914,13 @@ const index = ({
   switch (machine.extension) {
     case 'mcfx':
     case 'daf':
-      profile.useFirmwareRetraction = false;
       profile.filamentDiameter = new Array(extruderCount).fill(1.75);
       profile.preSideTransitionPrinterscript = '';
       profile.sideTransitionPrinterscript = '';
       profile.postSideTransitionPrinterscript = '';
       profile.gcodeFlavor = GCodeFlavor.MARLIN_2;
+      profile.useRelativeEDistances = false;
+      profile.useFirmwareRetraction = false;
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
