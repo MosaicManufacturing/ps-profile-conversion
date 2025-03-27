@@ -2,6 +2,8 @@ import type { Material, MaterialStyleFlags, MaterialStyleValues } from './types/
 import type { AutoStyleVariant, NumericStyleVariant, StyleVariant } from './types/styles';
 import type { DriveColorStrength, VariableTransitions } from './types/transitions';
 
+import type { ProjectColor } from '.';
+
 export type RGB = [number, number, number];
 
 export type RGBA = [number, number, number, number];
@@ -39,7 +41,7 @@ export const getVolumetricFlowRate = (
 export const validateArrayLengths = (
   extCount: number,
   materials: Material[],
-  colors: RGBA[],
+  colors: ProjectColor[],
   drivesUsed: boolean[],
   variableTransitions?: VariableTransitions
 ) => {

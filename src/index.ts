@@ -89,12 +89,15 @@ const extractNumberValue = (value: number | string): number => {
   return parsedFloat;
 };
 
+export const ANY_COLOR = 'any';
+type AnyColor = typeof ANY_COLOR;
+export type ProjectColor = RGBA | AnyColor;
 interface Inputs {
   usableInputCount: number | null;
   machine: MachineSettings;
   style: StyleSettings;
   materials: Material[];
-  colors: RGBA[];
+  colors: ProjectColor[];
   palette: PaletteData | null;
   drivesUsed: boolean[];
   transitionTower?: TransitionTower;
@@ -825,8 +828,10 @@ const index = ({
 
   // material names and colors
   for (let i = 0; i < extruderCount; i++) {
+    const projectColor = colors[i]!;
     const material = materials[i]!;
-    const hexColor = `#${rgbToHex(colors[i]!)}`;
+    // let the HEX color be the an invalid value if the input can use 'any' color
+    const hexColor = projectColor === ANY_COLOR ? ANY_COLOR : `#${rgbToHex(projectColor)}`;
     profile.filamentColor[i] = hexColor;
     profile.extruderColor[i] = hexColor;
     profile.filamentSettingsId[i] = material.name.replace(/"/g, '\\"');
