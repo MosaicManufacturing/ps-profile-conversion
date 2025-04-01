@@ -24,10 +24,11 @@ import {
 } from './types/styles';
 import type { TransitionTower, VariableTransitions } from './types/transitions';
 import {
+  ANY_COLOR,
   getMaterialFieldValue,
   getTransitionLength,
   getVolumetricFlowRate,
-  RGBA,
+  ProjectColor,
   rgbToHex,
   roundTo,
   validateArrayLengths,
@@ -89,9 +90,6 @@ const extractNumberValue = (value: number | string): number => {
   return parsedFloat;
 };
 
-export const ANY_COLOR = 'any';
-type AnyColor = typeof ANY_COLOR;
-export type ProjectColor = RGBA | AnyColor;
 interface Inputs {
   usableInputCount: number | null;
   machine: MachineSettings;

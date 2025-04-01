@@ -2,11 +2,11 @@ import type { Material, MaterialStyleFlags, MaterialStyleValues } from './types/
 import type { AutoStyleVariant, NumericStyleVariant, StyleVariant } from './types/styles';
 import type { DriveColorStrength, VariableTransitions } from './types/transitions';
 
-import type { ProjectColor } from '.';
-
 export type RGB = [number, number, number];
-
 export type RGBA = [number, number, number, number];
+export const ANY_COLOR = 'any';
+type AnyColor = typeof ANY_COLOR;
+export type ProjectColor = RGBA | AnyColor;
 
 export const roundTo = (value: number, decimalPlaces: number) => {
   const factor = 10 ** decimalPlaces;
