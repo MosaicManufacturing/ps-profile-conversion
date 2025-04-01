@@ -828,7 +828,7 @@ const index = ({
   for (let i = 0; i < extruderCount; i++) {
     const projectColor = colors[i]!;
     const material = materials[i]!;
-    // let the HEX color be the an invalid value if the input can use 'any' color
+    // set the HEX color to 'any' (an invalid HEX value) when the input allows using any color
     const hexColor = projectColor === ANY_COLOR ? ANY_COLOR : `#${rgbToHex(projectColor)}`;
     profile.filamentColor[i] = hexColor;
     profile.extruderColor[i] = hexColor;
