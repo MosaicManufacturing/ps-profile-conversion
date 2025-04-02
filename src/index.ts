@@ -24,10 +24,11 @@ import {
 } from './types/styles';
 import type { TransitionTower, VariableTransitions } from './types/transitions';
 import {
+  ANY_COLOR,
   getMaterialFieldValue,
   getTransitionLength,
   getVolumetricFlowRate,
-  RGBA,
+  ProjectColor,
   rgbToHex,
   roundTo,
   validateArrayLengths,
@@ -94,7 +95,7 @@ interface Inputs {
   machine: MachineSettings;
   style: StyleSettings;
   materials: Material[];
-  colors: RGBA[];
+  colors: ProjectColor[];
   palette: PaletteData | null;
   drivesUsed: boolean[];
   transitionTower?: TransitionTower;
@@ -825,8 +826,10 @@ const index = ({
 
   // material names and colors
   for (let i = 0; i < extruderCount; i++) {
+    const projectColor = colors[i]!;
     const material = materials[i]!;
-    const hexColor = `#${rgbToHex(colors[i]!)}`;
+    // set the HEX color to 'any' (an invalid HEX value) when the input allows using any color
+    const hexColor = projectColor === ANY_COLOR ? ANY_COLOR : `#${rgbToHex(projectColor)}`;
     profile.filamentColor[i] = hexColor;
     profile.extruderColor[i] = hexColor;
     profile.filamentSettingsId[i] = material.name.replace(/"/g, '\\"');

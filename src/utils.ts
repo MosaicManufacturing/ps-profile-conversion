@@ -3,8 +3,10 @@ import type { AutoStyleVariant, NumericStyleVariant, StyleVariant } from './type
 import type { DriveColorStrength, VariableTransitions } from './types/transitions';
 
 export type RGB = [number, number, number];
-
 export type RGBA = [number, number, number, number];
+export const ANY_COLOR = 'any';
+type AnyColor = typeof ANY_COLOR;
+export type ProjectColor = RGBA | AnyColor;
 
 export const roundTo = (value: number, decimalPlaces: number) => {
   const factor = 10 ** decimalPlaces;
@@ -39,7 +41,7 @@ export const getVolumetricFlowRate = (
 export const validateArrayLengths = (
   extCount: number,
   materials: Material[],
-  colors: RGBA[],
+  colors: ProjectColor[],
   drivesUsed: boolean[],
   variableTransitions?: VariableTransitions
 ) => {
