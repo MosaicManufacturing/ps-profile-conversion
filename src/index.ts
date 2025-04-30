@@ -62,10 +62,12 @@ const convertSupportDensity = (density: number, extrusionWidth: number): number 
 
 const convertSupportStyle = (supportStyle: CanvasSupportStyle): SupportStyle => {
   switch (supportStyle) {
-    case CanvasSupportStyle.Grid: // grid
+    case CanvasSupportStyle.Grid:
       return SupportStyle.GRID;
-    case CanvasSupportStyle.Snug: // snug
+    case CanvasSupportStyle.Snug:
       return SupportStyle.SNUG;
+    case CanvasSupportStyle.Tree:
+      return SupportStyle.ORGANIC;
     default:
       return SupportStyle.GRID;
   }
