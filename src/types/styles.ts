@@ -38,6 +38,7 @@ export enum Slic3rInfillStyle {
 export enum CanvasSupportStyle {
   Grid = 0,
   Snug = 1,
+  Tree = 2,
 }
 
 export const slic3rInfillStylesToFillPattern: Readonly<Record<Slic3rInfillStyle, InfillPattern>> = {
