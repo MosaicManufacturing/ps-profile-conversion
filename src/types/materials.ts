@@ -38,6 +38,15 @@ export type MaterialStyleFlags = {
 
 export type MaterialStyleSettings = MaterialStyleValues & MaterialStyleFlags;
 
+export interface MaterialDensifierParams {
+  coolTime: number; // seconds
+  numActuations: number;
+  chipSize: number; // mm
+  feedRate: number; // mm/s
+  idealTemperature: number; // degrees C
+  retractLength: number; // mm
+  retractSpeed: number; // mm/s
+}
 export interface Material {
   id: string;
   name: string;
@@ -47,4 +56,5 @@ export interface Material {
   diameter: number;
   materialChangeSequence?: string;
   style: MaterialStyleSettings;
+  densifier: MaterialDensifierParams | null;
 }

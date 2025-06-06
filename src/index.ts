@@ -787,7 +787,10 @@ const index = ({
     if (style.useRetracts || style.useRetracts === undefined) {
       const retractLength = getMaterialFieldValue(material, 'retractLength', style.retractLength);
       profile.retractLength[i] = retractLength;
-      profile.retractLengthToolchange[i] = retractLength;
+      // use densifier retract length for element tool changes
+      if (material.densifier && machine.extension === 'daf') {
+        profile.retractLengthToolchange[i] = material.densifier.retractLength;
+      }
     } else {
       profile.retractLength[i] = 0;
       profile.retractLengthToolchange[i] = 0;
