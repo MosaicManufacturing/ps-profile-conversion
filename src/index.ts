@@ -790,6 +790,8 @@ const index = ({
       // use densifier retract length for element tool changes
       if (material.densifier && machine.extension === 'daf') {
         profile.retractLengthToolchange[i] = material.densifier.retractLength;
+      } else {
+        profile.retractLengthToolchange[i] = retractLength;
       }
     } else {
       profile.retractLength[i] = 0;
