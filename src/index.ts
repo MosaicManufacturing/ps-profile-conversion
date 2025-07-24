@@ -35,10 +35,10 @@ import {
   variantValue,
 } from './utils';
 
-// Scaling factor for support tree branch diameter
+// scaling factor for support tree branch diameter
 const SUPPORT_TREE_BRANCH_DIAMETER_SCALING_FACTOR = 2.5;
 
-// Scaling factor for support tree tip diameter
+// scaling factor for support tree tip diameter
 const SUPPORT_TREE_TIP_DIAMETER_SCALING_FACTOR = 2;
 
 const convertSolidFillStyle = (solidFillStyle: number): SolidFillPattern => {
@@ -553,7 +553,7 @@ const index = ({
   }
 
   // organic support tree settings
-  // automatically scale parameters based on nozzle diameter to prevent constraint violations
+  // automatically scale parameters based on supportMaterialExtrusionWidth to prevent constraint violations
   if (profile.supportMaterialStyle == SupportStyle.ORGANIC) {
     // support_tree_tip_diameter: must be ≥ support_material_extrusion_width
     profile.supportTreeTipDiameter = Math.max(
