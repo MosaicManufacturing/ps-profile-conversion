@@ -563,7 +563,7 @@ const index = ({
     // support_tree_branch_diameter: Must be ≥ 2 × support_material_extrusion_width and ≥ support_tree_tip_diameter
     profile.supportTreeBranchDiameter = Math.max(
       profile.supportTreeBranchDiameter,
-      SUPPORT_TREE_BRANCH_DIAMETER_SCALING_FACTOR * profile.supportMaterialExtrusionWidth
+      roundTo(SUPPORT_TREE_BRANCH_DIAMETER_SCALING_FACTOR * profile.supportMaterialExtrusionWidth, 1)
     );
   }
 
