@@ -35,6 +35,12 @@ import {
   variantValue,
 } from './utils';
 
+// Scaling factor for support tree branch diameter
+const SUPPORT_TREE_BRANCH_DIAMETER_SCALING_FACTOR = 2.5;
+
+// Scaling factor for support tree tip diameter
+const SUPPORT_TREE_TIP_DIAMETER_SCALING_FACTOR = 2;
+
 const convertSolidFillStyle = (solidFillStyle: number): SolidFillPattern => {
   switch (solidFillStyle) {
     case 0: // rectilinear
@@ -544,6 +550,21 @@ const index = ({
   } else {
     profile.supportMaterialInterfaceExtruder = profile.supportMaterialExtruder;
     profile.supportMaterialInterfaceLayers = 0;
+  }
+
+  // organic support tree settings
+  // automatically scale parameters based on nozzle diameter to prevent constraint violations
+  if (profile.supportMaterialStyle == SupportStyle.ORGANIC) {
+    // support_tree_tip_diameter: must be ≥ support_material_extrusion_width
+    profile.supportTreeTipDiameter = Math.max(
+      profile.supportTreeTipDiameter,
+      SUPPORT_TREE_TIP_DIAMETER_SCALING_FACTOR * profile.supportMaterialExtrusionWidth
+    );
+    // support_tree_branch_diameter: Must be ≥ 2 × support_material_extrusion_width and ≥ support_tree_tip_diameter
+    profile.supportTreeBranchDiameter = Math.max(
+      profile.supportTreeBranchDiameter,
+      SUPPORT_TREE_BRANCH_DIAMETER_SCALING_FACTOR * profile.supportMaterialExtrusionWidth
+    );
   }
 
   // rafts
