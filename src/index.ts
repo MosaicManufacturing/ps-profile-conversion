@@ -948,7 +948,7 @@ const index = ({
       profile.gcodeFlavor = GCodeFlavor.MARLIN_2;
       profile.useRelativeEDistances = false;
       profile.useFirmwareRetraction = false;
-      // Emit motion parameters (M201, M203, M204, and M205 G-code commands) specifically to ensure
+      // Emit default motion parameters (M201, M203, M204, and M205 G-code commands) specifically to ensure
       // PrusaSlicer's time estimation uses our custom travel acceleration values instead of its default.
       // Without emitting these parameters, PrusaSlicer ignores the travel acceleration values we provide
       // and falls back to its own built-in default travel acceleration for time estimation calculations.
