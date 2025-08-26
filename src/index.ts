@@ -3,6 +3,7 @@ import {
   BrimType,
   GCodeFlavor,
   InfillPattern,
+  MachineLimitsUsage,
   SeamPosition,
   SolidFillPattern,
   SupportStyle,
@@ -947,6 +948,14 @@ const index = ({
       profile.gcodeFlavor = GCodeFlavor.MARLIN_2;
       profile.useRelativeEDistances = false;
       profile.useFirmwareRetraction = false;
+      // Emit motion parameters (M201, M203, M204, and M205 G-code commands) specifically to ensure
+      // PrusaSlicer's time estimation uses our custom travel acceleration values instead of its default.
+      // Without emitting these parameters, PrusaSlicer ignores the travel acceleration values we provide
+      // and falls back to its own built-in default travel acceleration for time estimation calculations.
+      // Note: These parameters are added to the G-code header but removed during post-processing
+      // so that if the printer firmware is updated and we don't make corresponding parity changes,
+      // the printer's updated firmware values will take precedence.
+      profile.machineLimitsUsage = MachineLimitsUsage.EMIT_TO_GCODE;
       break;
     case 'makerbot':
       profile.useRelativeEDistances = true;
