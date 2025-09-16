@@ -36,7 +36,19 @@ export const getVolumetricFlowRate = (
   feedrate: number,
   layerHeight: number,
   extrusionWidth: number
-): number => layerHeight * extrusionWidth * feedrate;
+): number => {
+  /*
+  https://help.prusa3d.com/article/layers-and-perimeters_1748#recommended-thin-wall-thickness
+  Extruded filament's cross-sectional area takes the shape of a capsule. 
+  Rectangular piece in the middle, represented by this formula: 
+  Area = rectangle + circle = layerHeight * (extrusionWidth - layerHeight) + (pi) * (layerHeight / 2)^2
+  */
+  // rectangle * feedrate
+  const rectangularPieceVolumetricFlowRate = layerHeight * (extrusionWidth - layerHeight) * feedrate;
+  // circle * feedrate
+  const circlePieceVolumetricFlowRate = Math.PI * (layerHeight / 2) ** 2 * feedrate;
+  return rectangularPieceVolumetricFlowRate + circlePieceVolumetricFlowRate;
+};
 
 export const validateArrayLengths = (
   extCount: number,
