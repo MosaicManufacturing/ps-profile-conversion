@@ -375,6 +375,7 @@ const index = ({
       profile.brimType = BrimType.OUTER_ONLY;
       profile.brimWidth = roundTo(style.brimLoops * profile.firstLayerExtrusionWidth, 4);
       profile.brimSeparation = style.brimGap;
+      profile.skirtHeight = 1;
     }
   }
 
