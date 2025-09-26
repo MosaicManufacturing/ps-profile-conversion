@@ -1,5 +1,8 @@
-import { getVolumetricFlowRate } from '../src/utils';
-
+import {
+  EXTRUSION_WIDTH_MIN_MSG,
+  getVolumetricFlowRate,
+  NON_NEGATIVE_VOLUMETRIC_FLOW_INPUTS_MSG,
+} from '../src/utils';
 describe('getVolumetricFlowRate', () => {
   it('calculates correct flow rate', () => {
     // feedrate = 10 mm/s, layerHeight = 0.2 mm, extrusionWidth = 0.4 mm
@@ -39,12 +42,12 @@ describe('getVolumetricFlowRate', () => {
   });
 
   it('throws for negative inputs', () => {
-    expect(() => getVolumetricFlowRate(-1, 0.2, 0.4)).toThrow(RangeError);
-    expect(() => getVolumetricFlowRate(10, -0.2, 0.4)).toThrow(RangeError);
-    expect(() => getVolumetricFlowRate(10, 0.2, -0.4)).toThrow(RangeError);
+    expect(() => getVolumetricFlowRate(-1, 0.2, 0.4)).toThrow(NON_NEGATIVE_VOLUMETRIC_FLOW_INPUTS_MSG);
+    expect(() => getVolumetricFlowRate(10, -0.2, 0.4)).toThrow(NON_NEGATIVE_VOLUMETRIC_FLOW_INPUTS_MSG);
+    expect(() => getVolumetricFlowRate(10, 0.2, -0.4)).toThrow(NON_NEGATIVE_VOLUMETRIC_FLOW_INPUTS_MSG);
   });
 
   it('throws when extrusionWidth < layerHeight', () => {
-    expect(() => getVolumetricFlowRate(10, 0.4, 0.2)).toThrow(RangeError);
+    expect(() => getVolumetricFlowRate(10, 0.4, 0.2)).toThrow(EXTRUSION_WIDTH_MIN_MSG);
   });
 });
