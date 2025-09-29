@@ -5,6 +5,10 @@ import type { DriveColorStrength, VariableTransitions } from './types/transition
 export type RGB = [number, number, number];
 export type RGBA = [number, number, number, number];
 export const ANY_COLOR = 'any';
+export const NON_NEGATIVE_VOLUMETRIC_FLOW_INPUTS_MSG =
+  'feedrate, layerHeight, and extrusionWidth must be non-negative';
+export const EXTRUSION_WIDTH_MIN_MSG = 'extrusionWidth must be greater than or equal to layerHeight';
+
 type AnyColor = typeof ANY_COLOR;
 export type ProjectColor = RGBA | AnyColor;
 
@@ -32,11 +36,34 @@ export const getMaterialFieldValue = <T extends keyof MaterialStyleValues>(
   return material.style[useField] ? material.style[fieldName] : defaultValue;
 };
 
+/*
+  https://help.prusa3d.com/article/layers-and-perimeters_1748#recommended-thin-wall-thickness
+  Extruded filament's cross-sectional area takes the shape of a capsule. 
+  Rectangular piece in the middle, represented by this formula: 
+  Area = rectangle + circle = layerHeight * (extrusionWidth - layerHeight) + (pi) * (layerHeight / 2)^2
+  */
 export const getVolumetricFlowRate = (
   feedrate: number,
   layerHeight: number,
   extrusionWidth: number
-): number => layerHeight * extrusionWidth * feedrate;
+): number => {
+  // validate inputs
+  if (feedrate < 0 || layerHeight < 0 || extrusionWidth < 0) {
+    throw new RangeError(NON_NEGATIVE_VOLUMETRIC_FLOW_INPUTS_MSG);
+  }
+  // ensure extrusionWidth >= layerHeight
+  if (extrusionWidth < layerHeight) {
+    throw new RangeError(EXTRUSION_WIDTH_MIN_MSG);
+  }
+  if (feedrate === 0 || layerHeight === 0) return 0;
+
+  // rectangle contribution
+  const rectangularWidth = extrusionWidth - layerHeight;
+  const rectangularPieceVolumetricFlowRate = layerHeight * rectangularWidth * feedrate;
+  // circle contribution
+  const circlePieceVolumetricFlowRate = Math.PI * (layerHeight / 2) ** 2 * feedrate;
+  return rectangularPieceVolumetricFlowRate + circlePieceVolumetricFlowRate;
+};
 
 export const validateArrayLengths = (
   extCount: number,
