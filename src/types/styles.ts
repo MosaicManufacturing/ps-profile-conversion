@@ -165,6 +165,7 @@ export interface StyleSettings {
   supportInterfaceThickness: NumericStyleVariant<'mm'> | NumericStyleVariant<'layers'>;
   supportInterfaceDensity: NumericStyleVariant<'%'> | AutoStyleVariant;
   supportInterfaceExtrusionWidth: NumericStyleVariant<'mm'> | AutoStyleVariant;
+  supportFromPrintBedOnly: boolean;
   transitionMethod: TransitionMethod;
   transitionLength: number;
   transitionTarget: number;
