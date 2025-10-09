@@ -504,7 +504,7 @@ const index = ({
   profile.supportMaterial = style.useSupport;
   profile.supportMaterialAuto = !style.useCustomSupports;
   profile.supportMaterialSpacing = convertSupportDensity(style.supportDensity, profile.extrusionWidth);
-  profile.supportMaterialBuildplateOnly = style.supportOnBuildPlateOnly;
+  profile.supportMaterialBuildplateOnly = style.supportFromPrintBedOnly;
   if (style.supportStyle !== undefined) {
     profile.supportMaterialStyle = convertSupportStyle(style.supportStyle);
   }
